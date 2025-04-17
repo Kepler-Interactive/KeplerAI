@@ -224,7 +224,7 @@
 							<div class="mb-1">
 <div class="flex flex-col items-center justify-center">
   <!-- Logo -->
-  <img src="/keplerspin.gif" alt="KeplerAI" class="h-50 w-50 mb-4" />
+  <img src="/keplerspin.gif" alt="KeplerAI" class="h-48 w-48 mb-4" />
 
 <!-- Login Title -->
 <div class="text-4xl font-medium">
