@@ -224,10 +224,10 @@
 							<div class="mb-1">
 <div class="flex flex-col items-center justify-center">
   <!-- Logo -->
-  <img src="/kepler-symbol-blue.png" alt="KeplerAI" class="h-20 w-20 mb-4" />
+  <img src="/kepler.gif" alt="KeplerAI" class="h-20 w-20 mb-4" />
 
   <!-- Login Title -->
-  <div class="text-2xl font-medium" style="font-family: 'Monument Grotesk', sans-serif;">
+  <div class="text-2xl font-medium">
     {#if $config?.onboarding ?? false}
       {$i18n.t(`Get started with {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
     {:else if mode === 'ldap'}
