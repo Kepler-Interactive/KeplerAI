@@ -227,7 +227,7 @@
   <img src="/keplerspin.gif" alt="KeplerAI" class="h-50 w-50 mb-4" />
 
   <!-- Login Title -->
-  <div class="text-4xl font-semibold font-monument">
+  <div class="text-4xl font-semibold">
     {#if $config?.onboarding ?? false}
       {$i18n.t(`Get started with {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
     {:else if mode === 'ldap'}
