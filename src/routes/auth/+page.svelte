@@ -175,7 +175,7 @@
 />
 
 <div class="w-full h-screen max-h-[100dvh] text-white relative">
-	<div class="w-full h-full absolute top-0 left-0 bg-white dark:bg-black"></div>
+	<div class="w-full h-full absolute top-0 left-0" style="background-color: #3834FF;"></div>
 
 	<div class="w-full absolute top-0 left-0 right-0 h-8 drag-region" />
 
