@@ -226,18 +226,17 @@
   <!-- Logo -->
   <img src="/keplerspin.gif" alt="KeplerAI" class="h-50 w-50 mb-4" />
 
-  <!-- Login Title -->
-  <div class="text-4xl font-medium">
-    {#if $config?.onboarding ?? false}
-      {$i18n.t(`Get started with {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
-    {:else if mode === 'ldap'}
-      {$i18n.t(`Sign in to {{WEBUI_NAME}} with LDAP`, { WEBUI_NAME: $WEBUI_NAME })}
-{:else if mode === 'signin'}
-  KeplerAI
-    {:else}
-      {$i18n.t(`Sign up to {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
-    {/if}
-  </div>
+<!-- Login Title -->
+<div class="text-4xl font-medium">
+  {#if $config?.onboarding ?? false}
+    {$i18n.t(`Get started with {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
+  {:else if mode === 'ldap'}
+    {$i18n.t(`Sign in to {{WEBUI_NAME}} with LDAP`, { WEBUI_NAME: $WEBUI_NAME })}
+  {:else if mode === 'signin'}
+    KeplerAI
+  {:else}
+    {$i18n.t(`Sign up to {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
+  {/if}
 </div>
 
 
