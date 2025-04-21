@@ -141,6 +141,10 @@
 		{/if}
 
 		<div class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+			This project is a customized fork of Open WebUI, the community-driven open-source AI platform. This release is not affiliated with or maintained by the official Open WebUI team.
+		</div>
+
+		<div class="mt-2 text-xs text-gray-400 dark:text-gray-500">
 			Emoji graphics provided by
 			<a href="https://github.com/jdecked/twemoji" target="_blank">Twemoji</a>, licensed under
 			<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0</a>.
