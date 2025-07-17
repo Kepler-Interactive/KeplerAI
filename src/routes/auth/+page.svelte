@@ -173,7 +173,7 @@
 />
 
 <div class="w-full h-screen max-h-[100dvh] text-white relative">
-	<div class="w-full h-full absolute top-0 left-0 bg-white dark:bg-black"></div>
+	<div class="w-full h-full absolute top-0 left-0" style="background-color: #3924f6;"></div>
 
 	<div class="w-full absolute top-0 left-0 right-0 h-8 drag-region" />
 
@@ -212,6 +212,9 @@
 					</div>
 				{:else}
 					<div class="my-auto flex flex-col justify-center items-center">
+						<!-- KeplerAI Logo -->
+						<img src="/keplerspin.gif" alt="KeplerAI" class="h-48 w-48 mb-4" />
+						
 						<div class=" sm:max-w-md my-auto pb-10 w-full dark:text-gray-100">
 							<form
 								class=" flex flex-col justify-center"
@@ -227,7 +230,7 @@
 										{:else if mode === 'ldap'}
 											{$i18n.t(`Sign in to {{WEBUI_NAME}} with LDAP`, { WEBUI_NAME: $WEBUI_NAME })}
 										{:else if mode === 'signin'}
-											{$i18n.t(`Sign in to {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
+											KeplerAI
 										{:else}
 											{$i18n.t(`Sign up to {{WEBUI_NAME}}`, { WEBUI_NAME: $WEBUI_NAME })}
 										{/if}
