@@ -157,10 +157,10 @@ class OpenSearchClient(VectorDBBase):
 
         for field, value in filter.items():
             query_body["query"]["bool"]["filter"].append(
-                {"term": {"metadata." + str(field) + ".keyword": value}}
+                {"match": {"metadata." + str(field): value}}
             )
 
-        size = limit if limit else 10000
+        size = limit if limit else 10
 
         try:
             result = self.client.search(
@@ -206,7 +206,6 @@ class OpenSearchClient(VectorDBBase):
                 for item in batch
             ]
             bulk(self.client, actions)
-        self.client.indices.refresh(self._get_index_name(collection_name))
 
     def upsert(self, collection_name: str, items: list[VectorItem]):
         self._create_index_if_not_exists(
@@ -229,7 +228,6 @@ class OpenSearchClient(VectorDBBase):
                 for item in batch
             ]
             bulk(self.client, actions)
-        self.client.indices.refresh(self._get_index_name(collection_name))
 
     def delete(
         self,
@@ -253,12 +251,11 @@ class OpenSearchClient(VectorDBBase):
             }
             for field, value in filter.items():
                 query_body["query"]["bool"]["filter"].append(
-                    {"term": {"metadata." + str(field) + ".keyword": value}}
+                    {"match": {"metadata." + str(field): value}}
                 )
             self.client.delete_by_query(
                 index=self._get_index_name(collection_name), body=query_body
             )
-        self.client.indices.refresh(self._get_index_name(collection_name))
 
     def reset(self):
         indices = self.client.indices.get(index=f"{self.index_prefix}_*")

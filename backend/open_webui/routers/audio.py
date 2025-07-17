@@ -15,7 +15,6 @@ import aiohttp
 import aiofiles
 import requests
 import mimetypes
-from urllib.parse import quote
 
 from fastapi import (
     Depends,
@@ -328,7 +327,6 @@ async def speech(request: Request, user=Depends(get_verified_user)):
         log.exception(e)
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
-    r = None
     if request.app.state.config.TTS_ENGINE == "openai":
         payload["model"] = request.app.state.config.TTS_MODEL
 
@@ -337,7 +335,7 @@ async def speech(request: Request, user=Depends(get_verified_user)):
             async with aiohttp.ClientSession(
                 timeout=timeout, trust_env=True
             ) as session:
-                r = await session.post(
+                async with session.post(
                     url=f"{request.app.state.config.TTS_OPENAI_API_BASE_URL}/audio/speech",
                     json=payload,
                     headers={
@@ -345,7 +343,7 @@ async def speech(request: Request, user=Depends(get_verified_user)):
                         "Authorization": f"Bearer {request.app.state.config.TTS_OPENAI_API_KEY}",
                         **(
                             {
-                                "X-OpenWebUI-User-Name": quote(user.name, safe=" "),
+                                "X-OpenWebUI-User-Name": user.name,
                                 "X-OpenWebUI-User-Id": user.id,
                                 "X-OpenWebUI-User-Email": user.email,
                                 "X-OpenWebUI-User-Role": user.role,
@@ -355,15 +353,14 @@ async def speech(request: Request, user=Depends(get_verified_user)):
                         ),
                     },
                     ssl=AIOHTTP_CLIENT_SESSION_SSL,
-                )
+                ) as r:
+                    r.raise_for_status()
 
-                r.raise_for_status()
+                    async with aiofiles.open(file_path, "wb") as f:
+                        await f.write(await r.read())
 
-                async with aiofiles.open(file_path, "wb") as f:
-                    await f.write(await r.read())
-
-                async with aiofiles.open(file_body_path, "w") as f:
-                    await f.write(json.dumps(payload))
+                    async with aiofiles.open(file_body_path, "w") as f:
+                        await f.write(json.dumps(payload))
 
             return FileResponse(file_path)
 
@@ -371,18 +368,18 @@ async def speech(request: Request, user=Depends(get_verified_user)):
             log.exception(e)
             detail = None
 
-            status_code = 500
-            detail = f"Open WebUI: Server Connection Error"
+            try:
+                if r.status != 200:
+                    res = await r.json()
 
-            if r is not None:
-                status_code = r.status
-                res = await r.json()
-                if "error" in res:
-                    detail = f"External: {res['error'].get('message', '')}"
+                    if "error" in res:
+                        detail = f"External: {res['error'].get('message', '')}"
+            except Exception:
+                detail = f"External: {e}"
 
             raise HTTPException(
-                status_code=status_code,
-                detail=detail,
+                status_code=getattr(r, "status", 500) if r else 500,
+                detail=detail if detail else "Open WebUI: Server Connection Error",
             )
 
     elif request.app.state.config.TTS_ENGINE == "elevenlabs":
@@ -922,18 +919,14 @@ def transcription(
 ):
     log.info(f"file.content_type: {file.content_type}")
 
-    stt_supported_content_types = getattr(
-        request.app.state.config, "STT_SUPPORTED_CONTENT_TYPES", []
-    )
+    supported_content_types = request.app.state.config.STT_SUPPORTED_CONTENT_TYPES or [
+        "audio/*",
+        "video/webm",
+    ]
 
     if not any(
         fnmatch(file.content_type, content_type)
-        for content_type in (
-            stt_supported_content_types
-            if stt_supported_content_types
-            and any(t.strip() for t in stt_supported_content_types)
-            else ["audio/*", "video/webm"]
-        )
+        for content_type in supported_content_types
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
