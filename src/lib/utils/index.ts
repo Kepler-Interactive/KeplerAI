@@ -384,23 +384,25 @@ export const formatDate = (inputDate) => {
 	}
 };
 
-export const copyToClipboard = async (text, formatted = false) => {
+export const copyToClipboard = async (text, html = null, formatted = false) => {
 	if (formatted) {
-		const options = {
-			throwOnError: false,
-			highlight: function (code, lang) {
-				const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-				return hljs.highlight(code, { language }).value;
-			}
-		};
-		marked.use(markedKatexExtension(options));
-		marked.use(markedExtension(options));
-		// DEVELOPER NOTE: Go to `$lib/components/chat/Messages/Markdown.svelte` to add extra markdown extensions for rendering.
+		let styledHtml = '';
+		if (!html) {
+			const options = {
+				throwOnError: false,
+				highlight: function (code, lang) {
+					const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+					return hljs.highlight(code, { language }).value;
+				}
+			};
+			marked.use(markedKatexExtension(options));
+			marked.use(markedExtension(options));
+			// DEVELOPER NOTE: Go to `$lib/components/chat/Messages/Markdown.svelte` to add extra markdown extensions for rendering.
 
-		const htmlContent = marked.parse(text);
+			const htmlContent = marked.parse(text);
 
-		// Add basic styling to make the content look better when pasted
-		const styledHtml = `
+			// Add basic styling to make the content look better when pasted
+			styledHtml = `
 			<div>
 				<style>
 					pre {
@@ -448,6 +450,10 @@ export const copyToClipboard = async (text, formatted = false) => {
 				${htmlContent}
 			</div>
 		`;
+		} else {
+			// If HTML is provided, use it directly
+			styledHtml = html;
+		}
 
 		// Create a blob with HTML content
 		const blob = new Blob([styledHtml], { type: 'text/html' });
@@ -1314,7 +1320,6 @@ export const convertOpenApiToToolPayload = (openApiSpec) => {
 		for (const [method, operation] of Object.entries(methods)) {
 			if (operation?.operationId) {
 				const tool = {
-					type: 'function',
 					name: operation.operationId,
 					description: operation.description || operation.summary || 'No description available.',
 					parameters: {
@@ -1383,8 +1388,8 @@ export const slugify = (str: string): string => {
 			.replace(/[\u0300-\u036f]/g, '')
 			// 3. Replace any sequence of whitespace with a single hyphen
 			.replace(/\s+/g, '-')
-			// 4. Remove all characters except alphanumeric characters and hyphens
-			.replace(/[^a-zA-Z0-9-]/g, '')
+			// 4. Remove all characters except alphanumeric characters, hyphens, and underscores
+			.replace(/[^a-zA-Z0-9-_]/g, '')
 			// 5. Convert to lowercase
 			.toLowerCase()
 	);

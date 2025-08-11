@@ -34,10 +34,12 @@
 		tags,
 		banners,
 		showSettings,
+		showShortcuts,
 		showChangelog,
 		temporaryChatEnabled,
 		toolServers,
-		showSearch
+		showSearch,
+		showSidebar
 	} from '$lib/stores';
 
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
@@ -185,8 +187,8 @@
 				// Check if Ctrl + / is pressed
 				if (isCtrlPressed && event.key === '/') {
 					event.preventDefault();
-					console.log('showShortcuts');
-					document.getElementById('show-shortcuts-button')?.click();
+
+					showShortcuts.set(!$showShortcuts);
 				}
 
 				// Check if Ctrl + Shift + ' is pressed
@@ -338,7 +340,11 @@
 				{#if loaded}
 					<slot />
 				{:else}
-					<div class="w-full flex-1 h-full flex items-center justify-center">
+					<div
+						class="w-full flex-1 h-full flex items-center justify-center {$showSidebar
+							? '  md:max-w-[calc(100%-260px)]'
+							: ' '}"
+					>
 						<Spinner className="size-5" />
 					</div>
 				{/if}

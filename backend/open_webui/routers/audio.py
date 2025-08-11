@@ -376,9 +376,13 @@ async def speech(request: Request, user=Depends(get_verified_user)):
 
             if r is not None:
                 status_code = r.status
-                res = await r.json()
-                if "error" in res:
-                    detail = f"External: {res['error'].get('message', '')}"
+
+                try:
+                    res = await r.json()
+                    if "error" in res:
+                        detail = f"External: {res['error']}"
+                except Exception:
+                    detail = f"External: {e}"
 
             raise HTTPException(
                 status_code=status_code,
@@ -557,7 +561,11 @@ def transcription_handler(request, file_path, metadata):
             file_path,
             beam_size=5,
             vad_filter=request.app.state.config.WHISPER_VAD_FILTER,
-            language=metadata.get("language") or WHISPER_LANGUAGE,
+            language=(
+                metadata.get("language", None)
+                if WHISPER_LANGUAGE == ""
+                else WHISPER_LANGUAGE
+            ),
         )
         log.info(
             "Detected language '%s' with probability %f"
