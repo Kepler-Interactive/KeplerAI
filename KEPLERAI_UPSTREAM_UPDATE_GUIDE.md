@@ -9,8 +9,8 @@ This document provides instructions for updating the KeplerAI fork from the upst
 
 ## Current Version
 
-- **KeplerAI fork:** v0.9.2 (merged from upstream on 2026-05-08)
-- **Based on:** open-webui v0.9.2
+- **KeplerAI fork:** v0.9.5 (merged from upstream on 2026-05-14)
+- **Based on:** open-webui v0.9.5
 
 ---
 
@@ -245,6 +245,7 @@ These references to "Open WebUI" are **intentionally preserved** as proper attri
 | 2026-03-09 | v0.8.9 | v0.8.10 | `fa3bd41a0` - 33 commits merged |
 | 2026-03-30 | v0.8.10 | v0.8.12 | `9ceeeb63a` - 244 commits merged |
 | 2026-05-08 | v0.8.12 | v0.9.2 | `ec4fa6c91` - 410 commits merged |
+| 2026-05-14 | v0.9.2 | v0.9.5 | `5ed5a9be1` - 147 commits merged |
 
 ---
 
