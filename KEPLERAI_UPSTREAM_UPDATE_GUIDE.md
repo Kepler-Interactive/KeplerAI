@@ -232,6 +232,32 @@ These references to "Open WebUI" are **intentionally preserved** as proper attri
 
 ---
 
+## KeplerAI-Specific Customizations (MUST preserve during every merge)
+
+These are functional changes Kepler has made on top of upstream that are not branding-related. Resolve conflicts in favor of these.
+
+### Static asset Cache-Control headers (for Railway CDN)
+
+**File:** `backend/open_webui/main.py`
+
+To make Railway's opt-in CDN actually cache static assets, we set explicit `Cache-Control` headers on the `/static/*` and SPA frontend mounts. Without these headers Railway's edge passes everything through to the origin.
+
+Look for:
+- A `_cache_control_for(path, is_html=False)` helper just before the `SPAStaticFiles` class
+- A `CachedStaticFiles(StaticFiles)` class that wraps `get_response` to set `Cache-Control`
+- `SPAStaticFiles.get_response` also calls `_cache_control_for` on both the normal and `index.html` fallback paths
+- `/static` mount uses `CachedStaticFiles(...)` rather than bare `StaticFiles(...)`
+
+Cache policy:
+- `*/immutable/*` (SvelteKit fingerprinted chunks) → `public, max-age=31536000, immutable`
+- `version.json` → `no-cache, must-revalidate`
+- HTML / SPA fallback → `no-cache`
+- Everything else → `public, max-age=3600, must-revalidate`
+
+If upstream refactors the static mounts and removes these, restore from this guide. Do not use the `CACHE_CONTROL` env var as a substitute — it applies one global value to every response (including API/auth) and would either break auth caching or fail to cache static assets.
+
+---
+
 ## Merge History
 
 | Date | From Version | To Version | Commit |

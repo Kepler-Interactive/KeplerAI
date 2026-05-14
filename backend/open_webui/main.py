@@ -605,17 +605,43 @@ logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
 log = logging.getLogger(__name__)
 
 
+def _cache_control_for(path: str, is_html: bool = False) -> str:
+    # Long-lived caching for SvelteKit's fingerprinted assets; CDN-friendly.
+    if 'immutable/' in path:
+        return 'public, max-age=31536000, immutable'
+    # Frontend version manifest must always revalidate so clients pick up new builds.
+    if path.endswith('version.json'):
+        return 'no-cache, must-revalidate'
+    if is_html or path.endswith('.html') or path in ('', '/'):
+        return 'no-cache'
+    return 'public, max-age=3600, must-revalidate'
+
+
+class CachedStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        if response.status_code == 200:
+            response.headers['Cache-Control'] = _cache_control_for(path)
+        return response
+
+
 class SPAStaticFiles(StaticFiles):
     async def get_response(self, path: str, scope):
         try:
-            return await super().get_response(path, scope)
+            response = await super().get_response(path, scope)
+            if response.status_code == 200:
+                response.headers['Cache-Control'] = _cache_control_for(path)
+            return response
         except (HTTPException, StarletteHTTPException) as ex:
             if ex.status_code == 404:
                 if path.endswith('.js'):
                     # Return 404 for javascript files
                     raise ex
                 else:
-                    return await super().get_response('index.html', scope)
+                    response = await super().get_response('index.html', scope)
+                    if response.status_code == 200:
+                        response.headers['Cache-Control'] = _cache_control_for(path, is_html=True)
+                    return response
             else:
                 raise ex
 
@@ -2901,7 +2927,7 @@ async def healthcheck_with_db():
     return {'status': True}
 
 
-app.mount('/static', StaticFiles(directory=STATIC_DIR), name='static')
+app.mount('/static', CachedStaticFiles(directory=STATIC_DIR), name='static')
 
 
 @app.get('/cache/{path:path}')
