@@ -9,8 +9,8 @@ This document provides instructions for updating the KeplerAI fork from the upst
 
 ## Current Version
 
-- **KeplerAI fork:** v0.9.6 (merged from upstream on 2026-06-08)
-- **Based on:** open-webui v0.9.6
+- **KeplerAI fork:** v0.11.0 (merged from upstream on 2026-07-28)
+- **Based on:** open-webui v0.11.0
 
 ---
 
@@ -25,8 +25,11 @@ These are the files that control core user-visible branding. If upstream changes
 | File | Line | Value |
 |------|------|-------|
 | `src/lib/constants.ts` | 4 | `export const APP_NAME = 'KeplerAI';` |
-| `backend/open_webui/env.py` | ~90 | `WEBUI_NAME = os.environ.get("WEBUI_NAME", "KeplerAI")` |
+| `backend/open_webui/env.py` | ~891 | `WEBUI_NAME = os.getenv('WEBUI_NAME', 'KeplerAI')` |
 | `package.json` | 2 | `"name": "KeplerAI"` |
+
+> Note: as of v0.11.0 upstream reformatted the backend to single-quoted strings and
+> `os.getenv`. Grep for the symbol (`WEBUI_NAME`), not the old quoting style.
 
 #### 2. HTML Meta Tags & Title
 
@@ -37,7 +40,7 @@ These are the files that control core user-visible branding. If upstream changes
 | 26 | `<meta name="apple-mobile-web-app-title" content="KeplerAI" />` |
 | 34 | `<meta name="description" content="KeplerAI" />` |
 | 38 | `title="KeplerAI"` (opensearch link) |
-| 114 | `<title>KeplerAI</title>` |
+| 126 | `<title>KeplerAI</title>` |
 
 #### 3. PWA Manifest
 
@@ -68,22 +71,56 @@ These are the files that control core user-visible branding. If upstream changes
 |------|------|-------|
 | `backend/open_webui/main.py` | FastAPI title | `title="KeplerAI"` |
 | `backend/open_webui/__init__.py` | CLI version output | `f"KeplerAI version: {VERSION}"` |
-| `backend/open_webui/routers/openai.py` | X-Title header | `"X-Title": "KeplerAI"` |
+| `backend/open_webui/routers/openai.py` | X-Title header | `'X-Title': 'KeplerAI'` |
+| `backend/open_webui/routers/notifications.py` | Push-target test fallback | `getattr(request.app.state, 'WEBUI_NAME', 'KeplerAI')` |
 
-#### 6. Notification Branding
+#### 6. Notification & Tab-Title Branding
 
-**File:** `src/routes/+layout.svelte`
+Upstream switched the app-name separator from `•` to `/` in v0.11.0. KeplerAI follows
+upstream's separator — keep the code change, swap only the name.
 
-Two notification locations that show the app name to users:
-- Chat completion notification: `` `${displayTitle} • KeplerAI` ``
-- Channel message notification: `` `${title} • KeplerAI` ``
+**File:** `src/routes/+layout.svelte` — three notification sites:
+- Chat completion: `` `${data.title} / KeplerAI` ``
+- Channel message (displayTitle): `` `${displayTitle} / KeplerAI` ``
+- Channel message (title): `` `${title} / KeplerAI` ``
 
-#### 7. Error Messages
+**File:** `src/lib/components/channel/Channel.svelte` — two `<title>` sites in `<svelte:head>`:
+- DM title: `` `}, '')} / KeplerAI</title` ``
+- Named channel: `#{channel?.name ?? 'Channel'} / KeplerAI`
+
+#### 7. Auth Page Branding
+
+**File:** `src/routes/auth/+page.svelte`
+
+- Kepler purple background: `<div class="w-full h-full absolute top-0 left-0" style="background-color: #3924f6;">`
+  (upstream ships `bg-white dark:bg-black` here)
+- Spinning Kepler logo above the login card: `<img src="/keplerspin.gif" alt="KeplerAI" class="h-48 w-48 mb-4" />`
+- Sign-in heading is the literal `KeplerAI` rather than upstream's
+  `{$i18n.t('Sign in to {{WEBUI_NAME}}', ...)}` (signin mode only; ldap/signup keep the i18n string)
+
+Keep upstream's `id="auth-login-card"` on the card div — it was added in v0.11.0.
+
+#### 8. About Page Fork Attribution
+
+**File:** `src/lib/components/chat/Settings/About.svelte`
+
+Inside the `Community` `UserSettingSection`, between the Twemoji credit and the copyright
+notice, Kepler adds:
+
+> This project is a customized fork of Open WebUI, the community-driven open-source AI
+> platform. This release is not affiliated with or maintained by the official Open WebUI team.
+
+Upstream restructures this footer area fairly often — re-insert the paragraph as a sibling
+`<div class="text-xs text-gray-400 dark:text-gray-500">` matching upstream's current markup.
+
+#### 9. Error Messages
 
 These files contain user-visible error messages branded as "KeplerAI":
-- `backend/open_webui/routers/ollama.py` - "KeplerAI: Server Connection Error"
 - `backend/open_webui/routers/openai.py` - "KeplerAI: Server Connection Error"
 - `backend/open_webui/routers/audio.py` - "KeplerAI: Server Connection Error"
+
+> `ollama.py` no longer carries these strings — upstream refactored its error handling in
+> v0.11.0 to generic `HTTP Error` / `External Error` details. Nothing to brand there now.
 
 ### Branding Image Files (MUST preserve during every merge)
 
@@ -97,13 +134,17 @@ These are custom Kepler image assets. They should NEVER be overwritten by upstre
 | `backend/open_webui/static/favicon.svg` | Vector favicon |
 | `backend/open_webui/static/favicon.ico` | ICO format favicon |
 | `backend/open_webui/static/favicon-96x96.png` | High-res favicon |
-| `backend/open_webui/static/favicon-dark.png` | Dark theme favicon |
 | `backend/open_webui/static/apple-touch-icon.png` | iOS home screen icon |
 | `backend/open_webui/static/logo.png` | PWA/manifest logo |
 | `backend/open_webui/static/splash.png` | Light theme splash screen |
 | `backend/open_webui/static/splash-dark.png` | Dark theme splash screen |
 | `backend/open_webui/static/web-app-manifest-192x192.png` | Android PWA icon (small) |
 | `backend/open_webui/static/web-app-manifest-512x512.png` | Android PWA icon (large) |
+
+> **Removed in v0.11.0:** `favicon-dark.png` (both the `backend/open_webui/static/` and
+> `static/static/` copies). Upstream deleted it in an asset refactor and no code in `src/`
+> or `backend/` ever referenced it, so KeplerAI accepted the deletion rather than carry a
+> conflict forward every merge. Nothing renders differently.
 
 ---
 
@@ -128,6 +169,7 @@ git fetch upstream
 
 ```bash
 # Create temp backup of all branding image files
+# (on Windows use a scratch dir, e.g. $env:TEMP\kepler-branding-backup)
 mkdir -p /tmp/kepler-branding-backup
 
 # Frontend static
@@ -138,7 +180,6 @@ cp backend/open_webui/static/favicon.png /tmp/kepler-branding-backup/backend-fav
 cp backend/open_webui/static/favicon.svg /tmp/kepler-branding-backup/
 cp backend/open_webui/static/favicon.ico /tmp/kepler-branding-backup/
 cp backend/open_webui/static/favicon-96x96.png /tmp/kepler-branding-backup/
-cp backend/open_webui/static/favicon-dark.png /tmp/kepler-branding-backup/
 cp backend/open_webui/static/apple-touch-icon.png /tmp/kepler-branding-backup/
 cp backend/open_webui/static/logo.png /tmp/kepler-branding-backup/
 cp backend/open_webui/static/splash.png /tmp/kepler-branding-backup/
@@ -161,9 +202,19 @@ Common conflict locations (resolve in favor of KeplerAI branding):
 
 - **`package.json`** - Keep `"name": "KeplerAI"`, take upstream version number
 - **`src/routes/+layout.svelte`** - Keep `KeplerAI` in notification strings, take upstream code changes
+- **`src/lib/components/channel/Channel.svelte`** - Keep `KeplerAI` in the two `<title>` tags
+- **`src/routes/auth/+page.svelte`** - Keep the keplerspin logo, purple background, and `KeplerAI` heading; take upstream's markup/attribute changes
+- **`src/lib/components/chat/Settings/About.svelte`** - Re-insert the fork-attribution paragraph into upstream's restructured footer
 - **`src/app.html`** - Keep all `KeplerAI` meta tags and title
 - **`src/lib/constants.ts`** - Keep `APP_NAME = 'KeplerAI'`
-- **`backend/open_webui/env.py`** - Keep `WEBUI_NAME` default as `"KeplerAI"`
+- **`backend/open_webui/env.py`** - Keep `WEBUI_NAME` default as `KeplerAI`
+- **`backend/open_webui/main.py`** - Usually an *additive* collision: upstream adds a new
+  top-level function right where the Kepler `_cache_control_for` / `CachedStaticFiles` block
+  lives. Keep both sides.
+
+**Guiding rule:** take upstream's code, substitute only the name. When upstream changes
+formatting or structure around a branded string (quoting style, separators, wrapper markup),
+adopt the change — carrying a cosmetic divergence forward means re-resolving it every merge.
 
 ### 5. Restore Branding After Merge
 
@@ -183,15 +234,55 @@ grep 'KeplerAI' backend/open_webui/static/site.webmanifest
 grep 'KeplerAI' static/opensearch.xml
 ```
 
+**Sweep for newly-introduced upstream branding.** A large merge adds new files that hardcode
+"Open WebUI". Review anything user-visible; leave i18n keys and genuine references to the
+upstream project/community alone (see "Known References" below).
+
+```bash
+# Backend: new hardcoded names outside comments/docstrings
+grep -rn "Open WebUI" backend/open_webui/routers/ backend/open_webui/main.py
+
+# Frontend: new strings outside the locale files
+grep -rn "Open WebUI" src/ --include=*.svelte --include=*.ts --include=*.html \
+  | grep -v "i18n/locales"
+```
+
+**Diff against upstream to see the complete Kepler delta.** This is the fastest way to
+confirm every customization survived and nothing extra crept in:
+
+```bash
+git diff upstream/main -- src/ backend/open_webui/
+```
+
 If any branding was overwritten, restore from the values documented in the "Branding Files Reference" section above.
 
 **Post-merge branding fixes to apply:**
 
 1. **FastAPI title:** In `backend/open_webui/main.py`, change `title="Open WebUI"` to `title="KeplerAI"`
 2. **CLI version:** In `backend/open_webui/__init__.py`, change `"Open WebUI version:"` to `"KeplerAI version:"`
-3. **X-Title header:** In `backend/open_webui/routers/openai.py`, change `"X-Title": "Open WebUI"` to `"X-Title": "KeplerAI"`
-4. **Error messages:** In `ollama.py`, `openai.py`, and `audio.py` routers, replace all `"Open WebUI: Server Connection Error"` with `"KeplerAI: Server Connection Error"`
-5. **Notifications:** In `src/routes/+layout.svelte`, ensure notification strings use `KeplerAI` not `Open WebUI`
+3. **X-Title header:** In `backend/open_webui/routers/openai.py`, change `'X-Title': 'Open WebUI'` to `'X-Title': 'KeplerAI'`
+4. **Error messages:** In `openai.py` and `audio.py` routers, replace all `'Open WebUI: Server Connection Error'` with `'KeplerAI: Server Connection Error'`
+5. **Notifications:** In `src/routes/+layout.svelte`, ensure the three notification strings use `KeplerAI`
+6. **Channel tab titles:** In `src/lib/components/channel/Channel.svelte`, ensure both `<title>` tags use `KeplerAI`
+7. **Push-target fallback:** In `backend/open_webui/routers/notifications.py`, the `getattr(request.app.state, 'WEBUI_NAME', ...)` default should be `'KeplerAI'`
+8. **Auth page:** In `src/routes/auth/+page.svelte`, confirm the keplerspin logo, `#3924f6` background, and `KeplerAI` signin heading are present
+9. **About page:** In `src/lib/components/chat/Settings/About.svelte`, confirm the fork-attribution paragraph is present
+
+**Then verify it actually compiles** — a large merge can leave a syntactically valid but
+broken resolution:
+
+```bash
+python -m py_compile backend/open_webui/main.py backend/open_webui/routers/*.py
+
+npm install
+# The v0.11.0 frontend needs more than Node's default heap; without this the build dies
+# with "Ineffective mark-compacts near heap limit" while rendering chunks.
+NODE_OPTIONS=--max-old-space-size=8192 npm run build   # PowerShell: $env:NODE_OPTIONS="--max-old-space-size=8192"
+```
+
+`npm install` rewrites the two `name` fields in `package-lock.json` to match
+`package.json` (`open-webui` → `KeplerAI`). That is expected — commit it, or the tree
+re-dirties on every install.
 
 ### 6. Verify Image Files
 
@@ -208,6 +299,11 @@ md5sum static/favicon.png
 ### 7. Commit
 
 ```bash
+# Check for stray untracked files first -- `git add -A` will sweep them into the merge
+# commit. The repo tends to accumulate artifacts like `nul` (from a Windows redirect) and
+# `.claude/scheduled_tasks.lock`.
+git status --short
+
 git add -A
 git commit -m "Merge upstream/main vX.Y.Z while preserving KeplerAI branding"
 ```
@@ -273,6 +369,7 @@ If upstream refactors the static mounts and removes these, restore from this gui
 | 2026-05-08 | v0.8.12 | v0.9.2 | `ec4fa6c91` - 410 commits merged |
 | 2026-05-14 | v0.9.2 | v0.9.5 | `5ed5a9be1` - 147 commits merged |
 | 2026-06-08 | v0.9.5 | v0.9.6 | `2d5a3c70d` - 248 commits merged |
+| 2026-07-28 | v0.9.6 | v0.11.0 | 1009 commits merged - 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png` |
 
 ---
 
@@ -291,7 +388,45 @@ If upstream refactors the static mounts and removes these, restore from this gui
 - [ ] `backend/open_webui/main.py` - FastAPI `title="KeplerAI"`
 - [ ] `backend/open_webui/__init__.py` - CLI says "KeplerAI version"
 - [ ] `backend/open_webui/routers/openai.py` - `X-Title: KeplerAI`
-- [ ] `src/routes/+layout.svelte` - Notifications say "KeplerAI"
-- [ ] Error messages in `ollama.py`, `openai.py`, `audio.py` say "KeplerAI"
+- [ ] `backend/open_webui/routers/notifications.py` - `WEBUI_NAME` fallback is "KeplerAI"
+- [ ] `src/routes/+layout.svelte` - All three notifications say "KeplerAI"
+- [ ] `src/lib/components/channel/Channel.svelte` - Both `<title>` tags say "KeplerAI"
+- [ ] `src/routes/auth/+page.svelte` - keplerspin logo, `#3924f6` background, "KeplerAI" heading
+- [ ] `src/lib/components/chat/Settings/About.svelte` - Fork-attribution paragraph present
+- [ ] Error messages in `openai.py`, `audio.py` say "KeplerAI"
+- [ ] Railway cache-control block intact in `main.py` (`_cache_control_for`, `CachedStaticFiles`, `/static` mount)
 - [ ] All Kepler image files verified (favicon, logo, splash, PWA icons, keplerspin.gif)
+- [ ] `grep -rn "Open WebUI"` sweep for newly-introduced upstream strings
+- [ ] `git diff upstream/main -- src/ backend/open_webui/` reviewed
+- [ ] `python -m py_compile` + `npm run build` both pass
+- [ ] New DB migrations reviewed for deploy risk (see below)
 - [ ] Committed and pushed
+
+---
+
+## Deploy Notes
+
+Check for new Alembic migrations each merge:
+
+```bash
+git diff ORIG_HEAD --name-only --diff-filter=A -- backend/open_webui/migrations/versions/
+```
+
+Migrations run automatically at startup, so a failing one takes the app down rather than
+degrading it. Read any new migration's `upgrade()` for pre-flight checks that `raise`.
+
+**v0.11.0 added 11 migrations.** Two warrant attention before deploying:
+
+- `f0bd01a18a3d_add_unique_normalized_user_email_index.py` — adds a UNIQUE index on
+  `lower(email)` and **raises `RuntimeError`, aborting startup, if any two users share a
+  case-insensitively identical email**. Check before deploying:
+
+  ```sql
+  SELECT lower(email), count(*) FROM "user"
+  WHERE email IS NOT NULL GROUP BY lower(email) HAVING count(*) > 1;
+  ```
+
+  If that returns rows, merge or remove the duplicate users first.
+
+- `3ff2c63645b8_reshape_config_to_per_key_rows.py` — restructures the `config` table from a
+  single blob into per-key rows. Back up the database before running it.
