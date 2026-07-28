@@ -369,7 +369,7 @@ If upstream refactors the static mounts and removes these, restore from this gui
 | 2026-05-08 | v0.8.12 | v0.9.2 | `ec4fa6c91` - 410 commits merged |
 | 2026-05-14 | v0.9.2 | v0.9.5 | `5ed5a9be1` - 147 commits merged |
 | 2026-06-08 | v0.9.5 | v0.9.6 | `2d5a3c70d` - 248 commits merged |
-| 2026-07-28 | v0.9.6 | v0.11.0 | 1009 commits merged - 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png` |
+| 2026-07-28 | v0.9.6 | v0.11.0 | `4f7484e42` - 1009 commits merged; 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png` |
 
 ---
 
