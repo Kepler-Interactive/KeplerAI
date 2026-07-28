@@ -22,11 +22,11 @@ These are the files that control core user-visible branding. If upstream changes
 
 #### 1. Application Name Constants
 
-| File | Line | Value |
-|------|------|-------|
-| `src/lib/constants.ts` | 4 | `export const APP_NAME = 'KeplerAI';` |
+| File                        | Line | Value                                              |
+| --------------------------- | ---- | -------------------------------------------------- |
+| `src/lib/constants.ts`      | 4    | `export const APP_NAME = 'KeplerAI';`              |
 | `backend/open_webui/env.py` | ~891 | `WEBUI_NAME = os.getenv('WEBUI_NAME', 'KeplerAI')` |
-| `package.json` | 2 | `"name": "KeplerAI"` |
+| `package.json`              | 2    | `"name": "KeplerAI"`                               |
 
 > Note: as of v0.11.0 upstream reformatted the backend to single-quoted strings and
 > `os.getenv`. Grep for the symbol (`WEBUI_NAME`), not the old quoting style.
@@ -35,12 +35,12 @@ These are the files that control core user-visible branding. If upstream changes
 
 **File:** `src/app.html`
 
-| Line | Element |
-|------|---------|
-| 26 | `<meta name="apple-mobile-web-app-title" content="KeplerAI" />` |
-| 34 | `<meta name="description" content="KeplerAI" />` |
-| 38 | `title="KeplerAI"` (opensearch link) |
-| 126 | `<title>KeplerAI</title>` |
+| Line | Element                                                         |
+| ---- | --------------------------------------------------------------- |
+| 26   | `<meta name="apple-mobile-web-app-title" content="KeplerAI" />` |
+| 34   | `<meta name="description" content="KeplerAI" />`                |
+| 38   | `title="KeplerAI"` (opensearch link)                            |
+| 126  | `<title>KeplerAI</title>`                                       |
 
 #### 3. PWA Manifest
 
@@ -48,11 +48,11 @@ These are the files that control core user-visible branding. If upstream changes
 
 ```json
 {
-  "name": "KeplerAI",
-  "short_name": "KeplerAI",
-  "description": "KeplerAI - AI Assistant Platform",
-  "theme_color": "#0066cc",
-  "background_color": "#0066cc"
+	"name": "KeplerAI",
+	"short_name": "KeplerAI",
+	"description": "KeplerAI - AI Assistant Platform",
+	"theme_color": "#0066cc",
+	"background_color": "#0066cc"
 }
 ```
 
@@ -67,11 +67,11 @@ These are the files that control core user-visible branding. If upstream changes
 
 #### 5. Backend API & CLI
 
-| File | What | Value |
-|------|------|-------|
-| `backend/open_webui/main.py` | FastAPI title | `title="KeplerAI"` |
-| `backend/open_webui/__init__.py` | CLI version output | `f"KeplerAI version: {VERSION}"` |
-| `backend/open_webui/routers/openai.py` | X-Title header | `'X-Title': 'KeplerAI'` |
+| File                                          | What                      | Value                                                  |
+| --------------------------------------------- | ------------------------- | ------------------------------------------------------ |
+| `backend/open_webui/main.py`                  | FastAPI title             | `title="KeplerAI"`                                     |
+| `backend/open_webui/__init__.py`              | CLI version output        | `f"KeplerAI version: {VERSION}"`                       |
+| `backend/open_webui/routers/openai.py`        | X-Title header            | `'X-Title': 'KeplerAI'`                                |
 | `backend/open_webui/routers/notifications.py` | Push-target test fallback | `getattr(request.app.state, 'WEBUI_NAME', 'KeplerAI')` |
 
 #### 6. Notification & Tab-Title Branding
@@ -80,11 +80,13 @@ Upstream switched the app-name separator from `•` to `/` in v0.11.0. KeplerAI 
 upstream's separator — keep the code change, swap only the name.
 
 **File:** `src/routes/+layout.svelte` — three notification sites:
+
 - Chat completion: `` `${data.title} / KeplerAI` ``
 - Channel message (displayTitle): `` `${displayTitle} / KeplerAI` ``
 - Channel message (title): `` `${title} / KeplerAI` ``
 
 **File:** `src/lib/components/channel/Channel.svelte` — two `<title>` sites in `<svelte:head>`:
+
 - DM title: `` `}, '')} / KeplerAI</title` ``
 - Named channel: `#{channel?.name ?? 'Channel'} / KeplerAI`
 
@@ -116,6 +118,7 @@ Upstream restructures this footer area fairly often — re-insert the paragraph 
 #### 9. Error Messages
 
 These files contain user-visible error messages branded as "KeplerAI":
+
 - `backend/open_webui/routers/openai.py` - "KeplerAI: Server Connection Error"
 - `backend/open_webui/routers/audio.py` - "KeplerAI: Server Connection Error"
 
@@ -126,20 +129,20 @@ These files contain user-visible error messages branded as "KeplerAI":
 
 These are custom Kepler image assets. They should NEVER be overwritten by upstream defaults.
 
-| File | Purpose |
-|------|---------|
-| `static/favicon.png` | Main favicon (128KB, Kepler-branded) |
-| `static/keplerspin.gif` | Animated spinning blue Kepler logo (11MB) |
-| `backend/open_webui/static/favicon.png` | Backend favicon |
-| `backend/open_webui/static/favicon.svg` | Vector favicon |
-| `backend/open_webui/static/favicon.ico` | ICO format favicon |
-| `backend/open_webui/static/favicon-96x96.png` | High-res favicon |
-| `backend/open_webui/static/apple-touch-icon.png` | iOS home screen icon |
-| `backend/open_webui/static/logo.png` | PWA/manifest logo |
-| `backend/open_webui/static/splash.png` | Light theme splash screen |
-| `backend/open_webui/static/splash-dark.png` | Dark theme splash screen |
-| `backend/open_webui/static/web-app-manifest-192x192.png` | Android PWA icon (small) |
-| `backend/open_webui/static/web-app-manifest-512x512.png` | Android PWA icon (large) |
+| File                                                     | Purpose                                   |
+| -------------------------------------------------------- | ----------------------------------------- |
+| `static/favicon.png`                                     | Main favicon (128KB, Kepler-branded)      |
+| `static/keplerspin.gif`                                  | Animated spinning blue Kepler logo (11MB) |
+| `backend/open_webui/static/favicon.png`                  | Backend favicon                           |
+| `backend/open_webui/static/favicon.svg`                  | Vector favicon                            |
+| `backend/open_webui/static/favicon.ico`                  | ICO format favicon                        |
+| `backend/open_webui/static/favicon-96x96.png`            | High-res favicon                          |
+| `backend/open_webui/static/apple-touch-icon.png`         | iOS home screen icon                      |
+| `backend/open_webui/static/logo.png`                     | PWA/manifest logo                         |
+| `backend/open_webui/static/splash.png`                   | Light theme splash screen                 |
+| `backend/open_webui/static/splash-dark.png`              | Dark theme splash screen                  |
+| `backend/open_webui/static/web-app-manifest-192x192.png` | Android PWA icon (small)                  |
+| `backend/open_webui/static/web-app-manifest-512x512.png` | Android PWA icon (large)                  |
 
 > **Removed in v0.11.0:** `favicon-dark.png` (both the `backend/open_webui/static/` and
 > `static/static/` copies). Upstream deleted it in an asset refactor and no code in `src/`
@@ -208,7 +211,7 @@ Common conflict locations (resolve in favor of KeplerAI branding):
 - **`src/app.html`** - Keep all `KeplerAI` meta tags and title
 - **`src/lib/constants.ts`** - Keep `APP_NAME = 'KeplerAI'`
 - **`backend/open_webui/env.py`** - Keep `WEBUI_NAME` default as `KeplerAI`
-- **`backend/open_webui/main.py`** - Usually an *additive* collision: upstream adds a new
+- **`backend/open_webui/main.py`** - Usually an _additive_ collision: upstream adds a new
   top-level function right where the Kepler `_cache_control_for` / `CachedStaticFiles` block
   lives. Keep both sides.
 
@@ -339,12 +342,14 @@ These are functional changes Kepler has made on top of upstream that are not bra
 To make Railway's opt-in CDN actually cache static assets, we set explicit `Cache-Control` headers on the `/static/*` and SPA frontend mounts. Without these headers Railway's edge passes everything through to the origin.
 
 Look for:
+
 - A `_cache_control_for(path, is_html=False)` helper just before the `SPAStaticFiles` class
 - A `CachedStaticFiles(StaticFiles)` class that wraps `get_response` to set `Cache-Control`
 - `SPAStaticFiles.get_response` also calls `_cache_control_for` on both the normal and `index.html` fallback paths
 - `/static` mount uses `CachedStaticFiles(...)` rather than bare `StaticFiles(...)`
 
 Cache policy:
+
 - `*/immutable/*` (SvelteKit fingerprinted chunks) → `public, max-age=31536000, immutable`
 - `version.json` → `no-cache, must-revalidate`
 - HTML / SPA fallback → `no-cache`
@@ -356,20 +361,20 @@ If upstream refactors the static mounts and removes these, restore from this gui
 
 ## Merge History
 
-| Date | From Version | To Version | Commit |
-|------|-------------|------------|--------|
-| 2025-07-17 | - | v0.7.2 | Initial Kepler branding on upstream merge |
-| 2025-09-26 | v0.7.2 | v0.7.2 | Branding refinements |
-| 2026-02-16 | v0.7.2 | v0.8.1 | `4fef8b9fb` - 344 commits merged |
-| 2026-02-16 | v0.8.1 | v0.8.3 | `8c714dd73` - 60 commits merged |
-| 2026-03-02 | v0.8.3 | v0.8.7 | `c00045c1d` - 306 commits merged |
-| 2026-03-09 | v0.8.7 | v0.8.9 | `4f02f60a4` - 142 commits merged |
-| 2026-03-09 | v0.8.9 | v0.8.10 | `fa3bd41a0` - 33 commits merged |
-| 2026-03-30 | v0.8.10 | v0.8.12 | `9ceeeb63a` - 244 commits merged |
-| 2026-05-08 | v0.8.12 | v0.9.2 | `ec4fa6c91` - 410 commits merged |
-| 2026-05-14 | v0.9.2 | v0.9.5 | `5ed5a9be1` - 147 commits merged |
-| 2026-06-08 | v0.9.5 | v0.9.6 | `2d5a3c70d` - 248 commits merged |
-| 2026-07-28 | v0.9.6 | v0.11.0 | `4f7484e42` - 1009 commits merged; 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png` |
+| Date       | From Version | To Version | Commit                                                                                        |
+| ---------- | ------------ | ---------- | --------------------------------------------------------------------------------------------- |
+| 2025-07-17 | -            | v0.7.2     | Initial Kepler branding on upstream merge                                                     |
+| 2025-09-26 | v0.7.2       | v0.7.2     | Branding refinements                                                                          |
+| 2026-02-16 | v0.7.2       | v0.8.1     | `4fef8b9fb` - 344 commits merged                                                              |
+| 2026-02-16 | v0.8.1       | v0.8.3     | `8c714dd73` - 60 commits merged                                                               |
+| 2026-03-02 | v0.8.3       | v0.8.7     | `c00045c1d` - 306 commits merged                                                              |
+| 2026-03-09 | v0.8.7       | v0.8.9     | `4f02f60a4` - 142 commits merged                                                              |
+| 2026-03-09 | v0.8.9       | v0.8.10    | `fa3bd41a0` - 33 commits merged                                                               |
+| 2026-03-30 | v0.8.10      | v0.8.12    | `9ceeeb63a` - 244 commits merged                                                              |
+| 2026-05-08 | v0.8.12      | v0.9.2     | `ec4fa6c91` - 410 commits merged                                                              |
+| 2026-05-14 | v0.9.2       | v0.9.5     | `5ed5a9be1` - 147 commits merged                                                              |
+| 2026-06-08 | v0.9.5       | v0.9.6     | `2d5a3c70d` - 248 commits merged                                                              |
+| 2026-07-28 | v0.9.6       | v0.11.0    | `4f7484e42` - 1009 commits merged; 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png` |
 
 ---
 

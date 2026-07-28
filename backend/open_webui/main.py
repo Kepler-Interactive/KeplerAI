@@ -298,9 +298,7 @@ class CachedStaticFiles(StaticFiles):
     async def get_response(self, path: str, scope):
         response = await super().get_response(path, scope)
         if response.status_code == 200:
-            response.headers['Cache-Control'] = _cache_control_for(
-                path, response.headers.get('content-type', '')
-            )
+            response.headers['Cache-Control'] = _cache_control_for(path, response.headers.get('content-type', ''))
         return response
 
 
@@ -309,9 +307,7 @@ class SPAStaticFiles(StaticFiles):
         try:
             response = await super().get_response(path, scope)
             if response.status_code == 200:
-                response.headers['Cache-Control'] = _cache_control_for(
-                    path, response.headers.get('content-type', '')
-                )
+                response.headers['Cache-Control'] = _cache_control_for(path, response.headers.get('content-type', ''))
             return response
         except (HTTPException, StarletteHTTPException) as ex:
             if ex.status_code == 404:
@@ -321,9 +317,7 @@ class SPAStaticFiles(StaticFiles):
                 else:
                     response = await super().get_response('index.html', scope)
                     if response.status_code == 200:
-                        response.headers['Cache-Control'] = _cache_control_for(
-                            path, is_html_fallback=True
-                        )
+                        response.headers['Cache-Control'] = _cache_control_for(path, is_html_fallback=True)
                     return response
             else:
                 raise ex
@@ -496,9 +490,9 @@ async def lifespan(app: FastAPI):
 apply_orjson_http_json()
 
 app = FastAPI(
-    title="KeplerAI",
-    docs_url="/docs" if ENV == "dev" else None,
-    openapi_url="/openapi.json" if ENV == "dev" else None,
+    title='KeplerAI',
+    docs_url='/docs' if ENV == 'dev' else None,
+    openapi_url='/openapi.json' if ENV == 'dev' else None,
     redoc_url=None,
     lifespan=lifespan,
 )
