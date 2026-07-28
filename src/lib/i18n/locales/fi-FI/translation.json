@@ -2471,7 +2471,6 @@
 	"Show your username label instead of You in chat bubbles.": "Näytä käyttäjänimi keskustelukuplissa \"Sinä\" -tekstin sijaan",
 	"Showcased creativity": "Osoitti luovuutta",
 	"Sign in": "Kirjaudu sisään",
-	"Sign in to {{WEBUI_NAME}}": "Kirjaudu sisään palveluun {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Kirjaudu sisään palveluun {{WEBUI_NAME}} LDAP:lla",
 	"Sign Out": "Kirjaudu ulos",
 	"Sign up": "Rekisteröidy",

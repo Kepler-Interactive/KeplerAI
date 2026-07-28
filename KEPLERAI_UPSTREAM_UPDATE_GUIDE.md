@@ -102,6 +102,16 @@ upstream's separator — keep the code change, swap only the name.
 
 Keep upstream's `id="auth-login-card"` on the card div — it was added in v0.11.0.
 
+> **This orphans an i18n key.** Because the signin heading no longer calls
+> `$i18n.t('Sign in to {{WEBUI_NAME}}')`, that key becomes unused and `npm run i18n:parse`
+> strips it from all 63 locale files. Upstream still uses the key, so every merge brings it
+> back and CI's "Ensure working tree is clean" step fails until it is stripped again.
+>
+> **After every merge, run `npm run i18n:parse` and commit the result** (should be exactly
+> one deletion per locale file — verify with `git diff --numstat`). The alternative is to
+> restore upstream's i18n heading, which renders "Sign in to KeplerAI" and ends the churn
+> permanently, at the cost of the bare-wordmark heading under the spinning logo.
+
 #### 8. About Page Fork Attribution
 
 **File:** `src/lib/components/chat/Settings/About.svelte`

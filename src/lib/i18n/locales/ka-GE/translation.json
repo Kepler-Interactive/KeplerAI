@@ -2471,7 +2471,6 @@
 	"Show your username label instead of You in chat bubbles.": "",
 	"Showcased creativity": "გამოკვეთილი კრეატიულობა",
 	"Sign in": "შესვლა",
-	"Sign in to {{WEBUI_NAME}}": "{{WEBUI_NAME}}-ში შესვლა",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "{{WEBUI_NAME}}-ში შესვლა LDAP-ით",
 	"Sign Out": "გასვლა",
 	"Sign up": "რეგისტრაცია",

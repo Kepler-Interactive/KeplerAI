@@ -2471,7 +2471,6 @@
 	"Show your username label instead of You in chat bubbles.": "",
 	"Showcased creativity": "Ko'rsatilgan ijodkorlik",
 	"Sign in": "tizimga kirish",
-	"Sign in to {{WEBUI_NAME}}": "{{WEBUI_NAME}} hisobiga kiring",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "LDAP yordamida {{WEBUI_NAME}} saytiga kiring",
 	"Sign Out": "Tizimdan chiqish",
 	"Sign up": "Ro'yxatdan o'tish",

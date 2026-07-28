@@ -2458,7 +2458,6 @@
 	"Show your username label instead of You in chat bubbles.": "",
 	"Showcased creativity": "很有创意",
 	"Sign in": "登录",
-	"Sign in to {{WEBUI_NAME}}": "登录 {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "使用 LDAP 登录 {{WEBUI_NAME}}",
 	"Sign Out": "登出",
 	"Sign up": "注册",

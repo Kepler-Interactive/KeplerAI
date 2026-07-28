@@ -2471,7 +2471,6 @@
 	"Show your username label instead of You in chat bubbles.": "",
 	"Showcased creativity": "Kreativitás bemutatva",
 	"Sign in": "Bejelentkezés",
-	"Sign in to {{WEBUI_NAME}}": "Bejelentkezés ide: {{WEBUI_NAME}}",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "Bejelentkezés ide: {{WEBUI_NAME}} LDAP-val",
 	"Sign Out": "Kijelentkezés",
 	"Sign up": "Regisztráció",

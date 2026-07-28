@@ -2460,7 +2460,6 @@
 	"Show your username label instead of You in chat bubbles.": "",
 	"Showcased creativity": "창의성 발휘",
 	"Sign in": "로그인",
-	"Sign in to {{WEBUI_NAME}}": "{{WEBUI_NAME}} 로그인",
 	"Sign in to {{WEBUI_NAME}} with LDAP": "LDAP로 {{WEBUI_NAME}}에 로그인",
 	"Sign Out": "로그아웃",
 	"Sign up": "가입",
