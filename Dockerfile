@@ -28,7 +28,12 @@ FROM --platform=$BUILDPLATFORM node:22-alpine3.20 AS build
 ARG BUILD_HASH
 
 # Set Node.js options (heap limit Allocation failed - JavaScript heap out of memory)
-# ENV NODE_OPTIONS="--max-old-space-size=4096"
+# Kepler: enabled and raised to 8192. Upstream ships this commented out, but as of
+# v0.11.1 the frontend build exceeds Node's ~4GB default heap and dies with
+# "Ineffective mark-compacts near heap limit" / SIGABRT during `vite build`.
+# This must live in the Dockerfile: Railway service variables do not reach a Docker
+# build stage, so setting NODE_OPTIONS on the service has no effect here.
+ENV NODE_OPTIONS="--max-old-space-size=8192"
 
 WORKDIR /app
 

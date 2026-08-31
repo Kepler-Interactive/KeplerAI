@@ -337,6 +337,25 @@ NODE_OPTIONS=--max-old-space-size=8192 npm run build   # PowerShell: $env:NODE_O
 `package.json` (`open-webui` → `KeplerAI`). That is expected — commit it, or the tree
 re-dirties on every install.
 
+> **The Railway build needs the same heap bump — and it must be set in the `Dockerfile`.**
+> The frontend build OOMs on Node's default heap (~4GB); v0.11.1 was the merge where it
+> tipped over, failing with `Ineffective mark-compacts near heap limit` and
+> `npm error signal SIGABRT` during `vite build`.
+>
+> Upstream ships the fix commented out in the frontend build stage of `Dockerfile`:
+>
+> ```dockerfile
+> # ENV NODE_OPTIONS="--max-old-space-size=4096"
+> ```
+>
+> Kepler uncomments it and raises it to `8192`. **Keep this through every merge** — it sits
+> in a stanza upstream still edits, so expect it to come back commented out.
+>
+> Setting `NODE_OPTIONS` as a Railway _service variable_ does **not** work: this service
+> builds from a Dockerfile, and Railway service variables are not injected into Docker
+> build stages. The symptom is a build that still caps at ~4000 MB despite the variable
+> being set.
+
 ### 6. Verify Image Files
 
 ```bash
@@ -384,6 +403,12 @@ These references to "Open WebUI" are **intentionally preserved** as proper attri
 ## KeplerAI-Specific Customizations (MUST preserve during every merge)
 
 These are functional changes Kepler has made on top of upstream that are not branding-related. Resolve conflicts in favor of these.
+
+### Frontend build heap limit (`Dockerfile`)
+
+The frontend build stage sets `ENV NODE_OPTIONS="--max-old-space-size=8192"`. Upstream ships
+that line commented out at 4096; without it the Railway build fails with a JS heap OOM. See
+the build note in step 5. Re-apply it if a merge reverts the stanza.
 
 ### Static asset Cache-Control headers (for Railway CDN)
 
@@ -452,6 +477,7 @@ If upstream refactors the static mounts and removes these, restore from this gui
 - [ ] Error messages in `openai.py`, `audio.py` say "KeplerAI"
 - [ ] `backend/open_webui/constants.py` - `SERVER_CONNECTION_ERROR` says "KeplerAI"
 - [ ] `backend/open_webui/env.py` - upstream's `WEBUI_NAME += ' (Open WebUI)'` suffix lines removed
+- [ ] `Dockerfile` - `ENV NODE_OPTIONS="--max-old-space-size=8192"` is uncommented in the frontend build stage
 - [ ] Railway cache-control block intact in `main.py` (`_cache_control_for`, `CachedStaticFiles`, `/static` mount)
 - [ ] All Kepler image files verified (favicon, logo, splash, PWA icons, keplerspin.gif)
 - [ ] `grep -rn "Open WebUI"` sweep for newly-introduced upstream strings
