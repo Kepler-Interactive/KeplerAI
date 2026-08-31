@@ -9,8 +9,8 @@ This document provides instructions for updating the KeplerAI fork from the upst
 
 ## Current Version
 
-- **KeplerAI fork:** v0.11.0 (merged from upstream on 2026-07-28)
-- **Based on:** open-webui v0.11.0
+- **KeplerAI fork:** v0.11.1 (merged from upstream on 2026-08-31)
+- **Based on:** open-webui v0.11.1
 
 ---
 
@@ -25,7 +25,7 @@ These are the files that control core user-visible branding. If upstream changes
 | File                        | Line | Value                                              |
 | --------------------------- | ---- | -------------------------------------------------- |
 | `src/lib/constants.ts`      | 4    | `export const APP_NAME = 'KeplerAI';`              |
-| `backend/open_webui/env.py` | ~891 | `WEBUI_NAME = os.getenv('WEBUI_NAME', 'KeplerAI')` |
+| `backend/open_webui/env.py` | ~932 | `WEBUI_NAME = os.getenv('WEBUI_NAME', 'KeplerAI')` |
 | `package.json`              | 2    | `"name": "KeplerAI"`                               |
 
 > Note: as of v0.11.0 upstream reformatted the backend to single-quoted strings and
@@ -107,8 +107,9 @@ Keep upstream's `id="auth-login-card"` on the card div — it was added in v0.11
 > strips it from all 63 locale files. Upstream still uses the key, so every merge brings it
 > back and CI's "Ensure working tree is clean" step fails until it is stripped again.
 >
-> **After every merge, run `npm run i18n:parse` and commit the result** (should be exactly
-> one deletion per locale file — verify with `git diff --numstat`). The alternative is to
+> **After every merge, run `npm run i18n:parse` and commit the result** (at most one deletion
+> per locale file — verify with `git diff --numstat`; how many locales are affected varies,
+> the v0.11.1 merge touched only `fo-FO` because the rest kept the stripped state). The alternative is to
 > restore upstream's i18n heading, which renders "Sign in to KeplerAI" and ends the churn
 > permanently, at the cost of the bare-wordmark heading under the spinning logo.
 
@@ -129,11 +130,50 @@ Upstream restructures this footer area fairly often — re-insert the paragraph 
 
 These files contain user-visible error messages branded as "KeplerAI":
 
+- `backend/open_webui/constants.py` — `SERVER_CONNECTION_ERROR` (the canonical constant, added
+  in v0.11.1 when upstream consolidated the string)
 - `backend/open_webui/routers/openai.py` - "KeplerAI: Server Connection Error"
 - `backend/open_webui/routers/audio.py` - "KeplerAI: Server Connection Error"
 
+> As of v0.11.1 upstream moved this string into `constants.py` but still has inline copies in
+> `openai.py` and `audio.py`. Brand all of them — grep for `Server Connection Error` rather
+> than assuming a single site.
+>
 > `ollama.py` no longer carries these strings — upstream refactored its error handling in
 > v0.11.0 to generic `HTTP Error` / `External Error` details. Nothing to brand there now.
+
+#### 10. Upstream LICENSE Branding Notices (added v0.11.1)
+
+Upstream v0.11.1 added ~148 in-code notices of the form:
+
+```
+# LICENSE covers this Open WebUI branding surface, ...
+# Do not alter, remove, obscure, or replace it except as LICENSE permits:
+# https://docs.openwebui.com/license.
+```
+
+They sit immediately above every branded string, so **they turn nearly every branding site
+into a merge conflict**. Where KeplerAI rebrands the string, drop the accompanying notice
+with it (a "do not alter" comment above altered text is just noise). Keep the notice where
+the branded content is itself preserved — e.g. the Open WebUI copyright attribution in
+`About.svelte`.
+
+**`env.py` also gained active enforcement** — delete these two lines on every merge:
+
+```python
+if WEBUI_NAME != 'Open WebUI':
+    WEBUI_NAME += ' (Open WebUI)'
+```
+
+Left in place, the app renders "KeplerAI (Open WebUI)" everywhere `WEBUI_NAME` appears.
+
+> **Licensing note.** LICENSE clause 4 (unchanged since before the fork started) prohibits
+> altering Open WebUI branding _except_ where: (i) total end users do not exceed fifty (50)
+> in any rolling 30-day period, (ii) written permission has been obtained, or (iii) an
+> enterprise license is in force. Every merge to date has rebranded on the basis that Kepler
+> falls within one of these. Re-confirm this still holds — v0.11.1 also added an admin-panel
+> banner in `src/lib/components/admin/Users/UserList.svelte` that appears once a workspace
+> exceeds 50 users.
 
 ### Branding Image Files (MUST preserve during every merge)
 
@@ -371,20 +411,21 @@ If upstream refactors the static mounts and removes these, restore from this gui
 
 ## Merge History
 
-| Date       | From Version | To Version | Commit                                                                                        |
-| ---------- | ------------ | ---------- | --------------------------------------------------------------------------------------------- |
-| 2025-07-17 | -            | v0.7.2     | Initial Kepler branding on upstream merge                                                     |
-| 2025-09-26 | v0.7.2       | v0.7.2     | Branding refinements                                                                          |
-| 2026-02-16 | v0.7.2       | v0.8.1     | `4fef8b9fb` - 344 commits merged                                                              |
-| 2026-02-16 | v0.8.1       | v0.8.3     | `8c714dd73` - 60 commits merged                                                               |
-| 2026-03-02 | v0.8.3       | v0.8.7     | `c00045c1d` - 306 commits merged                                                              |
-| 2026-03-09 | v0.8.7       | v0.8.9     | `4f02f60a4` - 142 commits merged                                                              |
-| 2026-03-09 | v0.8.9       | v0.8.10    | `fa3bd41a0` - 33 commits merged                                                               |
-| 2026-03-30 | v0.8.10      | v0.8.12    | `9ceeeb63a` - 244 commits merged                                                              |
-| 2026-05-08 | v0.8.12      | v0.9.2     | `ec4fa6c91` - 410 commits merged                                                              |
-| 2026-05-14 | v0.9.2       | v0.9.5     | `5ed5a9be1` - 147 commits merged                                                              |
-| 2026-06-08 | v0.9.5       | v0.9.6     | `2d5a3c70d` - 248 commits merged                                                              |
-| 2026-07-28 | v0.9.6       | v0.11.0    | `4f7484e42` - 1009 commits merged; 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png` |
+| Date       | From Version | To Version | Commit                                                                                                                        |
+| ---------- | ------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 2025-07-17 | -            | v0.7.2     | Initial Kepler branding on upstream merge                                                                                     |
+| 2025-09-26 | v0.7.2       | v0.7.2     | Branding refinements                                                                                                          |
+| 2026-02-16 | v0.7.2       | v0.8.1     | `4fef8b9fb` - 344 commits merged                                                                                              |
+| 2026-02-16 | v0.8.1       | v0.8.3     | `8c714dd73` - 60 commits merged                                                                                               |
+| 2026-03-02 | v0.8.3       | v0.8.7     | `c00045c1d` - 306 commits merged                                                                                              |
+| 2026-03-09 | v0.8.7       | v0.8.9     | `4f02f60a4` - 142 commits merged                                                                                              |
+| 2026-03-09 | v0.8.9       | v0.8.10    | `fa3bd41a0` - 33 commits merged                                                                                               |
+| 2026-03-30 | v0.8.10      | v0.8.12    | `9ceeeb63a` - 244 commits merged                                                                                              |
+| 2026-05-08 | v0.8.12      | v0.9.2     | `ec4fa6c91` - 410 commits merged                                                                                              |
+| 2026-05-14 | v0.9.2       | v0.9.5     | `5ed5a9be1` - 147 commits merged                                                                                              |
+| 2026-06-08 | v0.9.5       | v0.9.6     | `2d5a3c70d` - 248 commits merged                                                                                              |
+| 2026-07-28 | v0.9.6       | v0.11.0    | `4f7484e42` - 1009 commits merged; 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png`                                 |
+| 2026-08-31 | v0.11.0      | v0.11.1    | `ca3397ad6` - 460 commits merged; 12 conflicts; upstream added 148 LICENSE branding notices + `WEBUI_NAME` suffix enforcement |
 
 ---
 
@@ -409,6 +450,8 @@ If upstream refactors the static mounts and removes these, restore from this gui
 - [ ] `src/routes/auth/+page.svelte` - keplerspin logo, `#3924f6` background, "KeplerAI" heading
 - [ ] `src/lib/components/chat/Settings/About.svelte` - Fork-attribution paragraph present
 - [ ] Error messages in `openai.py`, `audio.py` say "KeplerAI"
+- [ ] `backend/open_webui/constants.py` - `SERVER_CONNECTION_ERROR` says "KeplerAI"
+- [ ] `backend/open_webui/env.py` - upstream's `WEBUI_NAME += ' (Open WebUI)'` suffix lines removed
 - [ ] Railway cache-control block intact in `main.py` (`_cache_control_for`, `CachedStaticFiles`, `/static` mount)
 - [ ] All Kepler image files verified (favicon, logo, splash, PWA icons, keplerspin.gif)
 - [ ] `grep -rn "Open WebUI"` sweep for newly-introduced upstream strings
@@ -430,7 +473,16 @@ git diff ORIG_HEAD --name-only --diff-filter=A -- backend/open_webui/migrations/
 Migrations run automatically at startup, so a failing one takes the app down rather than
 degrading it. Read any new migration's `upgrade()` for pre-flight checks that `raise`.
 
-**v0.11.0 added 11 migrations.** Two warrant attention before deploying:
+**v0.11.1 added 3 migrations**, all low-risk — no `raise` guards, no unique constraints:
+`1ce6ade7d93b` (group_member index), `6d09d1bf1f23` (repairs double-encoded `user.oauth`;
+fully guarded, but `downgrade()` is a no-op so it is not reversible), and `d4c1a8e37b62`
+(adds `chat.timer_at` plus five indexes on `chat`/`chat_message` — the index builds are the
+only meaningful cost, and they scale with table size).
+
+<details>
+<summary>v0.11.0 migration notes (historical)</summary>
+
+**v0.11.0 added 11 migrations.** Two warranted attention before deploying:
 
 - `f0bd01a18a3d_add_unique_normalized_user_email_index.py` — adds a UNIQUE index on
   `lower(email)` and **raises `RuntimeError`, aborting startup, if any two users share a
@@ -445,3 +497,5 @@ degrading it. Read any new migration's `upgrade()` for pre-flight checks that `r
 
 - `3ff2c63645b8_reshape_config_to_per_key_rows.py` — restructures the `config` table from a
   single blob into per-key rows. Back up the database before running it.
+
+</details>
