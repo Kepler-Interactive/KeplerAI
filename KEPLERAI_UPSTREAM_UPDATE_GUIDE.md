@@ -175,6 +175,17 @@ Left in place, the app renders "KeplerAI (Open WebUI)" everywhere `WEBUI_NAME` a
 > banner in `src/lib/components/admin/Users/UserList.svelte` that appears once a workspace
 > exceeds 50 users.
 
+#### 11. Kepler Feature Additions (non-branding, MUST preserve)
+
+| File                                          | What it is                                                                                      |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `backend/open_webui/routers/kepler_files.py`  | Signed, session-free file links: `GET /api/v1/files/{id}/signed?exp&sig` (HMAC with `WEBUI_SECRET_KEY`) and admin-only `GET /{id}/signed-url`. Used by the Seedance video tool so sandboxed chat embeds can play clips saved in storage. Kepler-only file; upstream never touches it. |
+| `backend/open_webui/main.py`                  | `kepler_files` in the `from open_webui.routers import (...)` block and `app.include_router(kepler_files.router, prefix='/api/v1/files', tags=['files'])` right after the `files.router` line. Additive; keep both sides on conflict. |
+| `Dockerfile`                                  | `NODE_OPTIONS` heap bump (see the OOM fix commit); upstream ships it commented out.             |
+
+The video tool itself lives outside this repo: `Kepler-Interactive/open-webui-tools`, branch `kepler`,
+`tools/kepler_seedance_video_tool.py`, installed on the instance as tool id `kepler_seedance_video`.
+
 ### Branding Image Files (MUST preserve during every merge)
 
 These are custom Kepler image assets. They should NEVER be overwritten by upstream defaults.
