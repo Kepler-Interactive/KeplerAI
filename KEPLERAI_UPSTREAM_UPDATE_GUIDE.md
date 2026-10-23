@@ -9,8 +9,8 @@ This document provides instructions for updating the KeplerAI fork from the upst
 
 ## Current Version
 
-- **KeplerAI fork:** v0.11.1 (merged from upstream on 2026-08-31)
-- **Based on:** open-webui v0.11.1
+- **KeplerAI fork:** v0.12.3 (merged from upstream on 2026-10-23)
+- **Based on:** open-webui v0.12.3
 
 ---
 
@@ -71,8 +71,13 @@ These are the files that control core user-visible branding. If upstream changes
 | --------------------------------------------- | ------------------------- | ------------------------------------------------------ |
 | `backend/open_webui/main.py`                  | FastAPI title             | `title="KeplerAI"`                                     |
 | `backend/open_webui/__init__.py`              | CLI version output        | `f"KeplerAI version: {VERSION}"`                       |
-| `backend/open_webui/routers/openai.py`        | X-Title header            | `'X-Title': 'KeplerAI'`                                |
+| `backend/open_webui/utils/headers.py`         | X-Title header (OpenRouter) | `'X-Title': 'KeplerAI'`                              |
 | `backend/open_webui/routers/notifications.py` | Push-target test fallback | `getattr(request.app.state, 'WEBUI_NAME', 'KeplerAI')` |
+| `backend/open_webui/utils/mfa.py`             | TOTP issuer (authenticator apps) | `issuer_name='KeplerAI'`                        |
+
+> v0.12.0 moved `get_headers_and_cookies` out of `routers/openai.py` into `utils/headers.py`;
+> the `X-Title` branding moved with it. The TOTP issuer is new in v0.12 (MFA) and is what users
+> see as the account label in their authenticator app.
 
 #### 6. Notification & Tab-Title Branding
 
@@ -89,6 +94,9 @@ upstream's separator — keep the code change, swap only the name.
 
 - DM title: `` `}, '')} / KeplerAI</title` ``
 - Named channel: `#{channel?.name ?? 'Channel'} / KeplerAI`
+
+**File:** `src/routes/(app)/channels/[id]/encrypted/+page.svelte` (new in v0.12) — hardcoded
+`<title>{$i18n.t('Encrypted chat')} · KeplerAI</title>` (upstream uses `·` here, not `/`).
 
 #### 7. Auth Page Branding
 
@@ -133,7 +141,8 @@ These files contain user-visible error messages branded as "KeplerAI":
 - `backend/open_webui/constants.py` — `SERVER_CONNECTION_ERROR` (the canonical constant, added
   in v0.11.1 when upstream consolidated the string)
 - `backend/open_webui/routers/openai.py` - "KeplerAI: Server Connection Error"
-- `backend/open_webui/routers/audio.py` - "KeplerAI: Server Connection Error"
+- `backend/open_webui/routers/audio/__init__.py` - "KeplerAI: Server Connection Error"
+  (was `routers/audio.py` until v0.12.0 turned it into a package)
 
 > As of v0.11.1 upstream moved this string into `constants.py` but still has inline copies in
 > `openai.py` and `audio.py`. Brand all of them — grep for `Server Connection Error` rather
@@ -260,6 +269,12 @@ cp static/opensearch.xml /tmp/kepler-branding-backup/
 git merge upstream/main --no-edit
 ```
 
+> **Watch for CRLF commits before merging.** Edits pushed through the GitHub web UI / API
+> from a Windows checkout can land with CRLF line endings (this happened to `main.py` in
+> `08440e7ff`), which makes every line of that file conflict with upstream. Check with
+> `git ls-files --eol | grep crlf` and fix with `git add --renormalize <file>` in a commit
+> *before* the merge.
+
 ### 4. Resolve Conflicts
 
 Common conflict locations (resolve in favor of KeplerAI branding):
@@ -324,13 +339,15 @@ If any branding was overwritten, restore from the values documented in the "Bran
 
 1. **FastAPI title:** In `backend/open_webui/main.py`, change `title="Open WebUI"` to `title="KeplerAI"`
 2. **CLI version:** In `backend/open_webui/__init__.py`, change `"Open WebUI version:"` to `"KeplerAI version:"`
-3. **X-Title header:** In `backend/open_webui/routers/openai.py`, change `'X-Title': 'Open WebUI'` to `'X-Title': 'KeplerAI'`
-4. **Error messages:** In `openai.py` and `audio.py` routers, replace all `'Open WebUI: Server Connection Error'` with `'KeplerAI: Server Connection Error'`
+3. **X-Title header:** In `backend/open_webui/utils/headers.py`, change `'X-Title': 'Open WebUI'` to `'X-Title': 'KeplerAI'`
+4. **Error messages:** In `routers/openai.py` and `routers/audio/__init__.py`, replace all `'Open WebUI: Server Connection Error'` with `'KeplerAI: Server Connection Error'`
 5. **Notifications:** In `src/routes/+layout.svelte`, ensure the three notification strings use `KeplerAI`
 6. **Channel tab titles:** In `src/lib/components/channel/Channel.svelte`, ensure both `<title>` tags use `KeplerAI`
 7. **Push-target fallback:** In `backend/open_webui/routers/notifications.py`, the `getattr(request.app.state, 'WEBUI_NAME', ...)` default should be `'KeplerAI'`
 8. **Auth page:** In `src/routes/auth/+page.svelte`, confirm the keplerspin logo, `#3924f6` background, and `KeplerAI` signin heading are present
 9. **About page:** In `src/lib/components/chat/Settings/About.svelte`, confirm the fork-attribution paragraph is present
+10. **TOTP issuer:** In `backend/open_webui/utils/mfa.py`, `issuer_name='KeplerAI'`
+11. **Encrypted chat title:** In `src/routes/(app)/channels/[id]/encrypted/+page.svelte`, `· KeplerAI`
 
 **Then verify it actually compiles** — a large merge can leave a syntactically valid but
 broken resolution:
@@ -343,6 +360,20 @@ npm install
 # with "Ineffective mark-compacts near heap limit" while rendering chunks.
 NODE_OPTIONS=--max-old-space-size=8192 npm run build   # PowerShell: $env:NODE_OPTIONS="--max-old-space-size=8192"
 ```
+
+> **Building on Windows (v0.12+).** `npm run build` now has a `prebuild` hook,
+> `crypto:verify` (`scripts/encryption/artifact.mjs`), that is Unix-only: it resolves the repo
+> root with `URL.pathname` (giving `C:\C:\...` → `ENOENT`), and its fingerprint hashes
+> `/`-separated paths and raw file bytes, which a Windows `autocrlf` checkout changes anyway.
+> Locally, skip the hook and run the build directly:
+>
+> ```powershell
+> npm run pyodide:fetch; $env:NODE_OPTIONS="--max-old-space-size=8192"; npx vite build
+> ```
+>
+> The hook still runs (and passes) in the Linux Docker build on Railway. It fails the build if
+> anything under `crypto/encryption/` or `src/lib/encryption/vendor/` differs from upstream,
+> so never edit those files.
 
 `npm install` rewrites the two `name` fields in `package-lock.json` to match
 `package.json` (`open-webui` → `KeplerAI`). That is expected — commit it, or the tree
@@ -462,6 +493,7 @@ If upstream refactors the static mounts and removes these, restore from this gui
 | 2026-06-08 | v0.9.5       | v0.9.6     | `2d5a3c70d` - 248 commits merged                                                                                              |
 | 2026-07-28 | v0.9.6       | v0.11.0    | `4f7484e42` - 1009 commits merged; 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png`                                 |
 | 2026-08-31 | v0.11.0      | v0.11.1    | `ca3397ad6` - 460 commits merged; 12 conflicts; upstream added 148 LICENSE branding notices + `WEBUI_NAME` suffix enforcement |
+| 2026-10-23 | v0.11.1      | v0.12.3    | `7218cae5d` - 1323 commits merged; 70 conflicts (64 = orphaned i18n key); X-Title moved to `utils/headers.py`; new MFA issuer + encrypted-chat title branded |
 
 ---
 
@@ -479,13 +511,15 @@ If upstream refactors the static mounts and removes these, restore from this gui
 - [ ] `static/opensearch.xml` - KeplerAI branding
 - [ ] `backend/open_webui/main.py` - FastAPI `title="KeplerAI"`
 - [ ] `backend/open_webui/__init__.py` - CLI says "KeplerAI version"
-- [ ] `backend/open_webui/routers/openai.py` - `X-Title: KeplerAI`
 - [ ] `backend/open_webui/routers/notifications.py` - `WEBUI_NAME` fallback is "KeplerAI"
 - [ ] `src/routes/+layout.svelte` - All three notifications say "KeplerAI"
 - [ ] `src/lib/components/channel/Channel.svelte` - Both `<title>` tags say "KeplerAI"
 - [ ] `src/routes/auth/+page.svelte` - keplerspin logo, `#3924f6` background, "KeplerAI" heading
 - [ ] `src/lib/components/chat/Settings/About.svelte` - Fork-attribution paragraph present
-- [ ] Error messages in `openai.py`, `audio.py` say "KeplerAI"
+- [ ] `backend/open_webui/utils/headers.py` - `X-Title: KeplerAI`
+- [ ] `backend/open_webui/utils/mfa.py` - TOTP `issuer_name='KeplerAI'`
+- [ ] `src/routes/(app)/channels/[id]/encrypted/+page.svelte` - title says "KeplerAI"
+- [ ] Error messages in `routers/openai.py`, `routers/audio/__init__.py` say "KeplerAI"
 - [ ] `backend/open_webui/constants.py` - `SERVER_CONNECTION_ERROR` says "KeplerAI"
 - [ ] `backend/open_webui/env.py` - upstream's `WEBUI_NAME += ' (Open WebUI)'` suffix lines removed
 - [ ] `Dockerfile` - `ENV NODE_OPTIONS="--max-old-space-size=8192"` is uncommented in the frontend build stage
@@ -509,6 +543,15 @@ git diff ORIG_HEAD --name-only --diff-filter=A -- backend/open_webui/migrations/
 
 Migrations run automatically at startup, so a failing one takes the app down rather than
 degrading it. Read any new migration's `upgrade()` for pre-flight checks that `raise`.
+
+**v0.12.3 (from v0.11.1) added 8 migrations**, all low-risk and additive:
+`a7d3e9f2b641` (`auth.mfa` + `auth.session_stamp`, both nullable — existing JWTs carry no
+stamp and the column starts NULL, so sessions survive the deploy), `b8e4f0a3c752`
+(`group.parent_group_id`), `d6a8c3f912ab` / `e7b9d4a023bc` / `f8c0e5b134cd` (skill, model,
+tool and function history tables), `b8f2c6d91a04` (Postgres partial index on pending files;
+swallows its own failure), `c92da83b017f` (apps table + `channel_member.app_id`; its
+`downgrade()` raises if app messages exist), and `0bd252b206fb` (inserts an `auth` row with
+an unusable empty password for any user missing one — OAuth users unaffected).
 
 **v0.11.1 added 3 migrations**, all low-risk — no `raise` guards, no unique constraints:
 `1ce6ade7d93b` (group_member index), `6d09d1bf1f23` (repairs double-encoded `user.oauth`;
