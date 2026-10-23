@@ -494,6 +494,16 @@ The frontend build stage sets `ENV NODE_OPTIONS="--max-old-space-size=8192"`. Up
 that line commented out at 4096; without it the Railway build fails with a JS heap OOM. See
 the build note in step 5. Re-apply it if a merge reverts the stanza.
 
+### No `RUN --mount=from=<image>` (`Dockerfile`)
+
+Railway's builder rejects any `RUN --mount` that isn't `type=cache`. The build dies about
+20 seconds in with `dockerfile invalid: flag '--mount=from=...' is missing a type=cache
+argument`. v0.12 upstream bind-mounts `uv` that way for the Python dependency install. Kepler
+replaces it with `COPY --from=ghcr.io/astral-sh/uv:<ver> /uv /bin/uv` followed by a plain
+`RUN`. GitHub's buildx accepts the mount form, so a green Actions image build does **not**
+prove the Dockerfile works on Railway. After every merge, run `grep -n -- '--mount' Dockerfile`
+and convert any non-cache mount.
+
 ### Static asset Cache-Control headers (for Railway CDN)
 
 **File:** `backend/open_webui/main.py`
@@ -565,6 +575,7 @@ If upstream refactors the static mounts and removes these, restore from this gui
 - [ ] `backend/open_webui/constants.py` - `SERVER_CONNECTION_ERROR` says "KeplerAI"
 - [ ] `backend/open_webui/env.py` - upstream's `WEBUI_NAME += ' (Open WebUI)'` suffix lines removed
 - [ ] `Dockerfile` - `ENV NODE_OPTIONS="--max-old-space-size=8192"` is uncommented in the frontend build stage
+- [ ] `Dockerfile` - `grep -- '--mount'` shows no `--mount=from=` (Railway only supports `type=cache`)
 - [ ] Railway cache-control block intact in `main.py` (`_cache_control_for`, `CachedStaticFiles`, `/static` mount)
 - [ ] All Kepler image files in `static/static/` verified (favicon, **logo.png**, splash, PWA icons) + `static/keplerspin.gif`; upstream-md5 check prints only `user.png`
 - [ ] `grep -rn "Open WebUI"` sweep for newly-introduced upstream strings
