@@ -199,20 +199,40 @@ The video tool itself lives outside this repo: `Kepler-Interactive/open-webui-to
 
 These are custom Kepler image assets. They should NEVER be overwritten by upstream defaults.
 
-| File                                                     | Purpose                                   |
-| -------------------------------------------------------- | ----------------------------------------- |
-| `static/favicon.png`                                     | Main favicon (128KB, Kepler-branded)      |
-| `static/keplerspin.gif`                                  | Animated spinning blue Kepler logo (11MB) |
-| `backend/open_webui/static/favicon.png`                  | Backend favicon                           |
-| `backend/open_webui/static/favicon.svg`                  | Vector favicon                            |
-| `backend/open_webui/static/favicon.ico`                  | ICO format favicon                        |
-| `backend/open_webui/static/favicon-96x96.png`            | High-res favicon                          |
-| `backend/open_webui/static/apple-touch-icon.png`         | iOS home screen icon                      |
-| `backend/open_webui/static/logo.png`                     | PWA/manifest logo                         |
-| `backend/open_webui/static/splash.png`                   | Light theme splash screen                 |
-| `backend/open_webui/static/splash-dark.png`              | Dark theme splash screen                  |
-| `backend/open_webui/static/web-app-manifest-192x192.png` | Android PWA icon (small)                  |
-| `backend/open_webui/static/web-app-manifest-512x512.png` | Android PWA icon (large)                  |
+> **`static/static/` is the source of truth, not `backend/open_webui/static/`.** At startup
+> `config.py` deletes every file in `backend/open_webui/static/` and refills it from the
+> frontend build's `static/` folder, i.e. the repo's `static/static/`. Only `static/static/`
+> (plus `static/favicon.png` and `static/keplerspin.gif`) reaches users. Until 2026-10-23 this
+> table listed the backend copies, and `static/static/logo.png` was still upstream's "OI" logo,
+> so Chrome's "Install app" / "Create shortcut" showed the Open WebUI icon on desktop and
+> Android. `logo.png` is the **only** icon `/manifest.json` declares (500x500, `any` + `maskable`),
+> so it must stay Kepler and exactly 500x500. It was made by resizing `web-app-manifest-512x512.png`.
+
+| File                                            | Purpose                                                     |
+| ----------------------------------------------- | ----------------------------------------------------------- |
+| `static/favicon.png`                            | Main favicon (128KB, Kepler-branded)                        |
+| `static/keplerspin.gif`                         | Animated spinning blue Kepler logo (11MB)                   |
+| `static/static/logo.png`                        | **PWA install icon** (`/manifest.json`), 500x500            |
+| `static/static/favicon.png`                     | Served favicon                                              |
+| `static/static/favicon.svg`                     | Vector favicon                                              |
+| `static/static/favicon.ico`                     | ICO format favicon                                          |
+| `static/static/favicon-96x96.png`               | High-res favicon                                            |
+| `static/static/apple-touch-icon.png`            | iOS "Add to Home Screen" icon                               |
+| `static/static/splash.png`                      | Light theme splash screen                                   |
+| `static/static/splash-dark.png`                 | Dark theme splash screen                                    |
+| `static/static/web-app-manifest-192x192.png`    | Android PWA icon (small)                                    |
+| `static/static/web-app-manifest-512x512.png`    | Android PWA icon (large)                                    |
+
+The `backend/open_webui/static/` copies only matter when no frontend build is present (local
+backend-only dev). `favicon.png`, `favicon.ico` and `logo.png` there are Kepler; the rest are upstream.
+
+Quick check that nothing served is still upstream's (only `user.png`, the default avatar, should print):
+
+```bash
+for f in static/static/*.png static/static/*.ico static/static/*.svg; do
+  [ "$(git show upstream/main:"$f" 2>/dev/null | md5sum)" = "$(md5sum < "$f")" ] && echo "UPSTREAM: $f"
+done
+```
 
 > **Removed in v0.11.0:** `favicon-dark.png` (both the `backend/open_webui/static/` and
 > `static/static/` copies). Upstream deleted it in an asset refactor and no code in `src/`
@@ -524,7 +544,7 @@ If upstream refactors the static mounts and removes these, restore from this gui
 - [ ] `backend/open_webui/env.py` - upstream's `WEBUI_NAME += ' (Open WebUI)'` suffix lines removed
 - [ ] `Dockerfile` - `ENV NODE_OPTIONS="--max-old-space-size=8192"` is uncommented in the frontend build stage
 - [ ] Railway cache-control block intact in `main.py` (`_cache_control_for`, `CachedStaticFiles`, `/static` mount)
-- [ ] All Kepler image files verified (favicon, logo, splash, PWA icons, keplerspin.gif)
+- [ ] All Kepler image files in `static/static/` verified (favicon, **logo.png**, splash, PWA icons) + `static/keplerspin.gif`; upstream-md5 check prints only `user.png`
 - [ ] `grep -rn "Open WebUI"` sweep for newly-introduced upstream strings
 - [ ] `git diff upstream/main -- src/ backend/open_webui/` reviewed
 - [ ] `python -m py_compile` + `npm run build` both pass
