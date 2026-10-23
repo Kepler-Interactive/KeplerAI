@@ -67,13 +67,13 @@ These are the files that control core user-visible branding. If upstream changes
 
 #### 5. Backend API & CLI
 
-| File                                          | What                      | Value                                                  |
-| --------------------------------------------- | ------------------------- | ------------------------------------------------------ |
-| `backend/open_webui/main.py`                  | FastAPI title             | `title="KeplerAI"`                                     |
-| `backend/open_webui/__init__.py`              | CLI version output        | `f"KeplerAI version: {VERSION}"`                       |
-| `backend/open_webui/utils/headers.py`         | X-Title header (OpenRouter) | `'X-Title': 'KeplerAI'`                              |
-| `backend/open_webui/routers/notifications.py` | Push-target test fallback | `getattr(request.app.state, 'WEBUI_NAME', 'KeplerAI')` |
-| `backend/open_webui/utils/mfa.py`             | TOTP issuer (authenticator apps) | `issuer_name='KeplerAI'`                        |
+| File                                          | What                             | Value                                                  |
+| --------------------------------------------- | -------------------------------- | ------------------------------------------------------ |
+| `backend/open_webui/main.py`                  | FastAPI title                    | `title="KeplerAI"`                                     |
+| `backend/open_webui/__init__.py`              | CLI version output               | `f"KeplerAI version: {VERSION}"`                       |
+| `backend/open_webui/utils/headers.py`         | X-Title header (OpenRouter)      | `'X-Title': 'KeplerAI'`                                |
+| `backend/open_webui/routers/notifications.py` | Push-target test fallback        | `getattr(request.app.state, 'WEBUI_NAME', 'KeplerAI')` |
+| `backend/open_webui/utils/mfa.py`             | TOTP issuer (authenticator apps) | `issuer_name='KeplerAI'`                               |
 
 > v0.12.0 moved `get_headers_and_cookies` out of `routers/openai.py` into `utils/headers.py`;
 > the `X-Title` branding moved with it. The TOTP issuer is new in v0.12 (MFA) and is what users
@@ -186,11 +186,11 @@ Left in place, the app renders "KeplerAI (Open WebUI)" everywhere `WEBUI_NAME` a
 
 #### 11. Kepler Feature Additions (non-branding, MUST preserve)
 
-| File                                          | What it is                                                                                      |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `backend/open_webui/routers/kepler_files.py`  | Signed, session-free file links: `GET /api/v1/files/{id}/signed?exp&sig` (HMAC with `WEBUI_SECRET_KEY`) and admin-only `GET /{id}/signed-url`. Used by the Seedance video tool so sandboxed chat embeds can play clips saved in storage. Kepler-only file; upstream never touches it. |
-| `backend/open_webui/main.py`                  | `kepler_files` in the `from open_webui.routers import (...)` block and `app.include_router(kepler_files.router, prefix='/api/v1/files', tags=['files'])` right after the `files.router` line. Additive; keep both sides on conflict. |
-| `Dockerfile`                                  | `NODE_OPTIONS` heap bump (see the OOM fix commit); upstream ships it commented out.             |
+| File                                         | What it is                                                                                                                                                                                                                                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `backend/open_webui/routers/kepler_files.py` | Signed, session-free file links: `GET /api/v1/files/{id}/signed?exp&sig` (HMAC with `WEBUI_SECRET_KEY`) and admin-only `GET /{id}/signed-url`. Used by the Seedance video tool so sandboxed chat embeds can play clips saved in storage. Kepler-only file; upstream never touches it. |
+| `backend/open_webui/main.py`                 | `kepler_files` in the `from open_webui.routers import (...)` block and `app.include_router(kepler_files.router, prefix='/api/v1/files', tags=['files'])` right after the `files.router` line. Additive; keep both sides on conflict.                                                  |
+| `Dockerfile`                                 | `NODE_OPTIONS` heap bump (see the OOM fix commit); upstream ships it commented out.                                                                                                                                                                                                   |
 
 The video tool itself lives outside this repo: `Kepler-Interactive/open-webui-tools`, branch `kepler`,
 `tools/kepler_seedance_video_tool.py`, installed on the instance as tool id `kepler_seedance_video`.
@@ -208,20 +208,20 @@ These are custom Kepler image assets. They should NEVER be overwritten by upstre
 > Android. `logo.png` is the **only** icon `/manifest.json` declares (500x500, `any` + `maskable`),
 > so it must stay Kepler and exactly 500x500. It was made by resizing `web-app-manifest-512x512.png`.
 
-| File                                            | Purpose                                                     |
-| ----------------------------------------------- | ----------------------------------------------------------- |
-| `static/favicon.png`                            | Main favicon (128KB, Kepler-branded)                        |
-| `static/keplerspin.gif`                         | Animated spinning blue Kepler logo (11MB)                   |
-| `static/static/logo.png`                        | **PWA install icon** (`/manifest.json`), 500x500            |
-| `static/static/favicon.png`                     | Served favicon                                              |
-| `static/static/favicon.svg`                     | Vector favicon                                              |
-| `static/static/favicon.ico`                     | ICO format favicon                                          |
-| `static/static/favicon-96x96.png`               | High-res favicon                                            |
-| `static/static/apple-touch-icon.png`            | iOS "Add to Home Screen" icon                               |
-| `static/static/splash.png`                      | Light theme splash screen                                   |
-| `static/static/splash-dark.png`                 | Dark theme splash screen                                    |
-| `static/static/web-app-manifest-192x192.png`    | Android PWA icon (small)                                    |
-| `static/static/web-app-manifest-512x512.png`    | Android PWA icon (large)                                    |
+| File                                         | Purpose                                          |
+| -------------------------------------------- | ------------------------------------------------ |
+| `static/favicon.png`                         | Main favicon (128KB, Kepler-branded)             |
+| `static/keplerspin.gif`                      | Animated spinning blue Kepler logo (11MB)        |
+| `static/static/logo.png`                     | **PWA install icon** (`/manifest.json`), 500x500 |
+| `static/static/favicon.png`                  | Served favicon                                   |
+| `static/static/favicon.svg`                  | Vector favicon                                   |
+| `static/static/favicon.ico`                  | ICO format favicon                               |
+| `static/static/favicon-96x96.png`            | High-res favicon                                 |
+| `static/static/apple-touch-icon.png`         | iOS "Add to Home Screen" icon                    |
+| `static/static/splash.png`                   | Light theme splash screen                        |
+| `static/static/splash-dark.png`              | Dark theme splash screen                         |
+| `static/static/web-app-manifest-192x192.png` | Android PWA icon (small)                         |
+| `static/static/web-app-manifest-512x512.png` | Android PWA icon (large)                         |
 
 The `backend/open_webui/static/` copies only matter when no frontend build is present (local
 backend-only dev). `favicon.png`, `favicon.ico` and `logo.png` there are Kepler; the rest are upstream.
@@ -293,7 +293,7 @@ git merge upstream/main --no-edit
 > from a Windows checkout can land with CRLF line endings (this happened to `main.py` in
 > `08440e7ff`), which makes every line of that file conflict with upstream. Check with
 > `git ls-files --eol | grep crlf` and fix with `git add --renormalize <file>` in a commit
-> *before* the merge.
+> _before_ the merge.
 
 ### 4. Resolve Conflicts
 
@@ -466,6 +466,28 @@ These references to "Open WebUI" are **intentionally preserved** as proper attri
 
 These are functional changes Kepler has made on top of upstream that are not branding-related. Resolve conflicts in favor of these.
 
+### Disabled upstream workflows (`.github/workflows/*.disabled`)
+
+Kepler disables upstream workflows that cannot or must not run in the fork by renaming them
+to `.disabled`: `codespell`, `lint-backend`, `lint-frontend`, and (since 2026-10-23):
+
+- `release-pypi`: publishes the package to PyPI **as `open-webui`** on every push to main.
+  It failed on every push since the fork began (no trusted-publisher rights), and it must
+  never succeed from here.
+- `docker`: builds 10 image variants (main/slim/ollama/cuda/cuda126 × amd64/arm64) on every
+  push, then fails pushing to `ghcr.io/kepler-interactive/keplerai` (`permission_denied`)
+  and Docker Hub (no credentials). Nothing uses those images, because Railway builds from the
+  Dockerfile itself. The image _builds_ did pass, so to test the Dockerfile on Linux, re-enable
+  it temporarily or run `docker build .`.
+
+If a merge brings either `.yml`/`.yaml` back (upstream edited it, which shows up as a
+modify/delete conflict), delete it again.
+
+**CI formatting gate:** `Frontend Build` runs `npm run format` + `npm run i18n:parse` over the
+whole repo, then `git diff --exit-code`. Prettier realigns Markdown tables, so run
+`npx prettier --write KEPLERAI_UPSTREAM_UPDATE_GUIDE.md` after editing this guide, or that
+job fails.
+
 ### Frontend build heap limit (`Dockerfile`)
 
 The frontend build stage sets `ENV NODE_OPTIONS="--max-old-space-size=8192"`. Upstream ships
@@ -498,21 +520,21 @@ If upstream refactors the static mounts and removes these, restore from this gui
 
 ## Merge History
 
-| Date       | From Version | To Version | Commit                                                                                                                        |
-| ---------- | ------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| 2025-07-17 | -            | v0.7.2     | Initial Kepler branding on upstream merge                                                                                     |
-| 2025-09-26 | v0.7.2       | v0.7.2     | Branding refinements                                                                                                          |
-| 2026-02-16 | v0.7.2       | v0.8.1     | `4fef8b9fb` - 344 commits merged                                                                                              |
-| 2026-02-16 | v0.8.1       | v0.8.3     | `8c714dd73` - 60 commits merged                                                                                               |
-| 2026-03-02 | v0.8.3       | v0.8.7     | `c00045c1d` - 306 commits merged                                                                                              |
-| 2026-03-09 | v0.8.7       | v0.8.9     | `4f02f60a4` - 142 commits merged                                                                                              |
-| 2026-03-09 | v0.8.9       | v0.8.10    | `fa3bd41a0` - 33 commits merged                                                                                               |
-| 2026-03-30 | v0.8.10      | v0.8.12    | `9ceeeb63a` - 244 commits merged                                                                                              |
-| 2026-05-08 | v0.8.12      | v0.9.2     | `ec4fa6c91` - 410 commits merged                                                                                              |
-| 2026-05-14 | v0.9.2       | v0.9.5     | `5ed5a9be1` - 147 commits merged                                                                                              |
-| 2026-06-08 | v0.9.5       | v0.9.6     | `2d5a3c70d` - 248 commits merged                                                                                              |
-| 2026-07-28 | v0.9.6       | v0.11.0    | `4f7484e42` - 1009 commits merged; 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png`                                 |
-| 2026-08-31 | v0.11.0      | v0.11.1    | `ca3397ad6` - 460 commits merged; 12 conflicts; upstream added 148 LICENSE branding notices + `WEBUI_NAME` suffix enforcement |
+| Date       | From Version | To Version | Commit                                                                                                                                                       |
+| ---------- | ------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2025-07-17 | -            | v0.7.2     | Initial Kepler branding on upstream merge                                                                                                                    |
+| 2025-09-26 | v0.7.2       | v0.7.2     | Branding refinements                                                                                                                                         |
+| 2026-02-16 | v0.7.2       | v0.8.1     | `4fef8b9fb` - 344 commits merged                                                                                                                             |
+| 2026-02-16 | v0.8.1       | v0.8.3     | `8c714dd73` - 60 commits merged                                                                                                                              |
+| 2026-03-02 | v0.8.3       | v0.8.7     | `c00045c1d` - 306 commits merged                                                                                                                             |
+| 2026-03-09 | v0.8.7       | v0.8.9     | `4f02f60a4` - 142 commits merged                                                                                                                             |
+| 2026-03-09 | v0.8.9       | v0.8.10    | `fa3bd41a0` - 33 commits merged                                                                                                                              |
+| 2026-03-30 | v0.8.10      | v0.8.12    | `9ceeeb63a` - 244 commits merged                                                                                                                             |
+| 2026-05-08 | v0.8.12      | v0.9.2     | `ec4fa6c91` - 410 commits merged                                                                                                                             |
+| 2026-05-14 | v0.9.2       | v0.9.5     | `5ed5a9be1` - 147 commits merged                                                                                                                             |
+| 2026-06-08 | v0.9.5       | v0.9.6     | `2d5a3c70d` - 248 commits merged                                                                                                                             |
+| 2026-07-28 | v0.9.6       | v0.11.0    | `4f7484e42` - 1009 commits merged; 7 conflicts; separator `•`→`/`; dropped `favicon-dark.png`                                                                |
+| 2026-08-31 | v0.11.0      | v0.11.1    | `ca3397ad6` - 460 commits merged; 12 conflicts; upstream added 148 LICENSE branding notices + `WEBUI_NAME` suffix enforcement                                |
 | 2026-10-23 | v0.11.1      | v0.12.3    | `7218cae5d` - 1323 commits merged; 70 conflicts (64 = orphaned i18n key); X-Title moved to `utils/headers.py`; new MFA issuer + encrypted-chat title branded |
 
 ---
